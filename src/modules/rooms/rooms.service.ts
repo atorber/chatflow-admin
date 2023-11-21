@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseEntity, MappingOptions } from '../utils/vika-orm'; // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
+import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
 
 @Injectable()
 export class RoomsService extends BaseEntity {

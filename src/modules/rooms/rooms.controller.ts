@@ -1,13 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { RoomsService } from './rooms.service.js';
-import { VikaDB } from '../db/vika-db.js';
+import { VikaDB } from '../../db/vika-db.js';
 import 'dotenv/config.js';
 
 @Controller('api/v1/group')
 export class RoomsController {
   @Get('list')
   async findAll(): Promise<string> {
-    const db = new VikaDB({
+    const db = new VikaDB();
+    await db.init({
       spaceName: process.env.VIKA_SPACE_NAME || '',
       token: process.env.VIKA_TOKEN || '',
     });

@@ -82,37 +82,45 @@ export class VikaDB {
       qaSheet: '',
     };
     this.dataBaseNames = { ...this.dataBaseIds };
-    this.spaceId = await this.getSpaceId();
-    // console.info('空间ID:', this.spaceId)
 
-    if (this.spaceId) {
-      const tables = await this.getNodesList();
-      console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2));
+    try {
+      const space = await this.getSpaceId();
+      if (space.code === 200) {
+        const tables = await this.getNodesList();
+        console.info(
+          '维格表文件列表：\n',
+          JSON.stringify(tables, undefined, 2),
+        );
 
-      await delay(1000);
+        await delay(1000);
 
-      for (const k in sheets) {
-        // console.info(this)
-        const sheet = sheets[k as keyof Sheets];
-        // console.info('数据模型：', k, sheet)
-        if (sheet && !tables[sheet.name]) {
-          console.info(`缺少数据表...\n${k}/${sheet.name}`);
-          this.isReady = false;
-          return false;
-        } else if (sheet) {
-          // console.info(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
-          this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
-          this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name];
+        for (const k in sheets) {
+          // console.info(this)
+          const sheet = sheets[k as keyof Sheets];
+          // console.info('数据模型：', k, sheet)
+          if (sheet && !tables[sheet.name]) {
+            console.info(`缺少数据表...\n${k}/${sheet.name}`);
+            this.isReady = false;
+            return false;
+          } else if (sheet) {
+            // console.info(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
+            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
+            this.dataBaseNames[k as keyof DateBase] = sheet.name;
+          }
         }
+        console.info('初始化表完成...');
+        return space;
+      } else {
+        console.info(
+          '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
+        );
+        return space;
       }
-      console.info('初始化表完成...');
-      return true;
-    } else {
-      console.info(
-        '\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n',
-      );
-      return false;
+    } catch (error) {
+      console.error('获取空间ID失败：', error);
+      return error;
     }
+    // console.info('空间ID:', this.spaceId)
   }
 
   async getAllSpaces() {
@@ -136,9 +144,9 @@ export class VikaDB {
       }
     }
     if (this.spaceId) {
-      return this.spaceId;
+      return { success: true, code: 200, data: this.spaceId };
     } else {
-      return undefined;
+      return spaceList;
     }
   }
 
