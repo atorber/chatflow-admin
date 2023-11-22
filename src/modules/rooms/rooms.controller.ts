@@ -1,17 +1,25 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RoomsService } from './rooms.service.js';
-import { VikaDB } from '../../db/vika-db.js';
+import { Store } from '../../db/store.js';
 import 'dotenv/config.js';
 
 @Controller('api/v1/group')
 export class RoomsController {
   @Get('list')
-  async findAll(): Promise<string> {
-    const db = new VikaDB();
-    await db.init({
-      spaceName: process.env.VIKA_SPACE_NAME || '',
-      token: process.env.VIKA_TOKEN || '',
-    });
+  async findAll(@Request() req: any): Promise<string> {
+    const user = req.user;
+    console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
     RoomsService.setVikaOptions({
       apiKey: db.token,
       baseId: db.dataBaseIds.roomSheet, // 设置 base ID

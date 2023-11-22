@@ -1,14 +1,28 @@
 import { VikaDB } from './vika-db.js';
 
 export class Store {
-  static users: {
-    [key: string]: VikaDB;
-  } = {};
+  static users: (VikaDB | any)[] = [
+    {
+      userId: 1,
+      username: 'john',
+      password: 'changeme',
+    },
+    {
+      userId: 2,
+      username: 'chris',
+      password: 'secret',
+    },
+    {
+      userId: 3,
+      username: 'maria',
+      password: 'guess',
+    },
+  ];
 
   // 注册用户
   static addUser(user: VikaDB) {
-    if (user.spaceId) {
-      Store.users[user.spaceId] = user;
+    if (user.userId) {
+      Store.users.push(user);
     }
     return {
       spaceName: user.spaceName,
@@ -17,14 +31,14 @@ export class Store {
   }
 
   // 移除用户
-  static removeUser(spaceName: string) {
-    delete Store.users[spaceName];
+  static removeUser(spaceId: string) {
+    // 移除用户
+    this.users = this.users.filter((user) => user.userId !== spaceId);
     return true;
   }
 
   // 查询用户
-  static findUser(spaceName: string) {
-    const user = Store.users[spaceName];
-    return user;
+  static findUser(spaceId: string) {
+    return this.users.find((user) => user.userId === spaceId);
   }
 }

@@ -5,7 +5,7 @@ import { sheets } from './vikaModel/index.js';
 import { delay } from '../utils/utils.js';
 
 export type VikaConfig = {
-  spaceName: string;
+  spaceId: string;
   token: string;
 };
 
@@ -51,9 +51,12 @@ export class KeyDisplaynameMap {
 
 export class VikaDB {
   spaceName: string;
+  username: string;
   token: string;
+  password: string;
   vika: Vika;
   spaceId: string | undefined;
+  userId: string | undefined;
   dataBaseIds: DateBase;
   dataBaseNames: DateBase;
   isReady: boolean = true;
@@ -63,10 +66,12 @@ export class VikaDB {
   }
   async init(config: VikaConfig) {
     console.info('初始化检查系统表...');
-    this.spaceName = config.spaceName;
+    this.spaceId = config.spaceId;
+    this.userId = this.spaceId;
+    this.username = this.spaceId;
     this.vika = new Vika({ token: config.token });
     this.token = config.token;
-    this.spaceId = '';
+    this.password = this.token;
     this.dataBaseIds = {
       messageSheet: '',
       keywordSheet: '',
@@ -84,8 +89,7 @@ export class VikaDB {
     this.dataBaseNames = { ...this.dataBaseIds };
 
     try {
-      const space = await this.getSpaceId();
-      if (space.code === 200) {
+      if (this.spaceId) {
         const tables = await this.getNodesList();
         console.info(
           '维格表文件列表：\n',
@@ -109,12 +113,12 @@ export class VikaDB {
           }
         }
         console.info('初始化表完成...');
-        return space;
+        return { success: true, code: 200, data: this.spaceId };
       } else {
         console.info(
           '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
         );
-        return space;
+        return { success: false, code: 400, data: '' };
       }
     } catch (error) {
       console.error('获取空间ID失败：', error);
@@ -140,6 +144,7 @@ export class VikaDB {
     for (const i in spaceList) {
       if (spaceList[i].name === this.spaceName) {
         this.spaceId = spaceList[i].id;
+        this.userId = this.spaceId;
         break;
       }
     }
