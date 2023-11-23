@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Store } from '../../db/store';
 import { VikaDB } from '../../db/vika-db';
+import { delay } from '../../utils/utils';
 
 @Injectable()
 export class AuthService {
@@ -37,9 +38,28 @@ export class AuthService {
         token: pass,
         spaceId: username,
       });
+      delay(500);
       if (userID) {
-        Store.addUser(userNew);
         user = userNew;
+        UsersService.setVikaOptions({
+          apiKey: user.token,
+          baseId: user.dataBaseIds.envSheet, // 设置 base ID
+        });
+        const resBotId = await UsersService.findByField('key', 'BASE_BOT_ID');
+        const BASE_BOT_ID: any = resBotId[0];
+        // console.debug('ServeLoginVika:', BASE_BOT_ID);
+
+        userNew.id = BASE_BOT_ID.fields.value || undefined;
+        delay(500);
+        const resBotName = await UsersService.findByField(
+          'key',
+          'BASE_BOT_NAME',
+        );
+        const BASE_BOT_NAME: any = resBotName[0];
+        // console.debug('ServeLoginVika:', BASE_BOT_NAME);
+
+        userNew.nickname = BASE_BOT_NAME.fields.value || undefined;
+        Store.addUser(userNew);
       } else {
         throw new UnauthorizedException();
       }

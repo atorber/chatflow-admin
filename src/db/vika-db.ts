@@ -52,6 +52,8 @@ export class KeyDisplaynameMap {
 export class VikaDB {
   spaceName: string;
   username: string;
+  nickname: string;
+  id: string;
   token: string;
   password: string;
   vika: Vika;
@@ -91,10 +93,10 @@ export class VikaDB {
     try {
       if (this.spaceId) {
         const tables = await this.getNodesList();
-        console.info(
-          '维格表文件列表：\n',
-          JSON.stringify(tables, undefined, 2),
-        );
+        // console.info(
+        //   '维格表文件列表：\n',
+        //   JSON.stringify(tables, undefined, 2),
+        // );
 
         await delay(1000);
 
