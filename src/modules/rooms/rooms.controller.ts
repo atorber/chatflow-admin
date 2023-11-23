@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service.js';
 import { Store } from '../../db/store.js';
-import 'dotenv/config.js';
 
 @Controller('api/v1/group')
 export class RoomsController {

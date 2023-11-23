@@ -1,7 +1,6 @@
 /* eslint-disable sort-keys */
 import type { ICreateRecordsReqParams, Vika } from '@vikadata/vika';
 import fs from 'fs';
-import 'dotenv/config.js';
 
 interface IField {
   [key: string]: string | '';

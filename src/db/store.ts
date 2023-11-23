@@ -1,23 +1,7 @@
 import { VikaDB } from './vika-db.js';
 
 export class Store {
-  static users: (VikaDB | any)[] = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'chris',
-      password: 'secret',
-    },
-    {
-      userId: 3,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  static users: VikaDB[] = [];
 
   // 注册用户
   static addUser(user: VikaDB) {

@@ -1,6 +1,5 @@
 /* eslint-disable guard-for-in */
 import { Vika, ICreateRecordsReqParams } from '@vikadata/vika';
-// import 'dotenv/config.js'
 
 interface IField {
   [key: string]: string | '';
