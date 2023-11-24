@@ -98,24 +98,28 @@ export class VikaDB {
         //   JSON.stringify(tables, undefined, 2),
         // );
 
-        await delay(1000);
+        if (tables) {
+          await delay(1000);
 
-        for (const k in sheets) {
-          // console.info(this)
-          const sheet = sheets[k as keyof Sheets];
-          // console.info('数据模型：', k, sheet)
-          if (sheet && !tables[sheet.name]) {
-            console.info(`缺少数据表...\n${k}/${sheet.name}`);
-            this.isReady = false;
-            return false;
-          } else if (sheet) {
-            // console.info(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
-            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
-            this.dataBaseNames[k as keyof DateBase] = sheet.name;
+          for (const k in sheets) {
+            // console.info(this)
+            const sheet = sheets[k as keyof Sheets];
+            // console.info('数据模型：', k, sheet)
+            if (sheet && !tables[sheet.name]) {
+              console.info(`缺少数据表...\n${k}/${sheet.name}`);
+              this.isReady = false;
+              return { success: false, code: 400, data: '' };
+            } else if (sheet) {
+              // console.info(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
+              this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
+              this.dataBaseNames[k as keyof DateBase] = sheet.name;
+            }
           }
+          console.info('初始化表完成...');
+          return { success: true, code: 200, data: this.spaceId };
+        } else {
+          return { success: false, code: 400, data: '' };
         }
-        console.info('初始化表完成...');
-        return { success: true, code: 200, data: this.spaceId };
       } else {
         console.info(
           '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
@@ -124,7 +128,7 @@ export class VikaDB {
       }
     } catch (error) {
       console.error('获取空间ID失败：', error);
-      return error;
+      return { success: false, code: 400, data: '' };
     }
     // console.info('空间ID:', this.spaceId)
   }
@@ -173,12 +177,13 @@ export class VikaDB {
             tables[node.name] = node.id;
           }
         });
+        return tables;
       } else {
         console.error('获取数据表失败:', nodeListResp);
+        return undefined;
       }
-      return tables;
     } else {
-      return {};
+      return undefined;
     }
   }
 

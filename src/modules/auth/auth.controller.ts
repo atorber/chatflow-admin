@@ -12,18 +12,38 @@ export class AuthController {
   async login(
     @Body() signInDto: { password: string; mobile: string; platform?: string },
   ) {
-    const access_token_res = this.authService.signIn(
+    const access_token_res = await this.authService.signIn(
       signInDto.mobile,
       signInDto.password,
     );
+    if (access_token_res.access_token) {
+      return {
+        code: 200,
+        message: 'success',
+        data: {
+          access_token: access_token_res.access_token,
+          expires_in: 36000000,
+          type: 'Bearer',
+        },
+      };
+    } else {
+      return {
+        code: 400,
+        message: '登录用户名或密码填写错误! ',
+        meta: {
+          error_line: 41,
+        },
+      };
+    }
+  }
+
+  @Post('logout')
+  async logout(@Body() body: any) {
+    console.info(body);
     return {
       code: 200,
       message: 'success',
-      data: {
-        access_token: (await access_token_res).access_token,
-        expires_in: 36000000,
-        type: 'Bearer',
-      },
+      data: {},
     };
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Store } from '../../db/store';
@@ -39,7 +39,7 @@ export class AuthService {
         spaceId: username,
       });
       delay(500);
-      if (userID) {
+      if (userID.data) {
         user = userNew;
         UsersService.setVikaOptions({
           apiKey: user.token,
@@ -60,21 +60,28 @@ export class AuthService {
 
         userNew.nickname = BASE_BOT_NAME.fields.value || undefined;
         Store.addUser(userNew);
+        const payload = {
+          username: user.username,
+          sub: user.userId,
+        };
+        console.debug(Store.users);
+        return {
+          access_token: await this.jwtService.signAsync(payload),
+        };
       } else {
-        throw new UnauthorizedException();
+        return {
+          access_token: '',
+        };
       }
     }
 
     if (user?.password !== pass) {
-      throw new UnauthorizedException();
+      return {
+        access_token: '',
+      };
     }
-    const payload = {
-      username: user.username,
-      sub: user.userId,
-    };
-    console.debug(Store.users);
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: '',
     };
   }
 }

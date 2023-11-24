@@ -4,6 +4,8 @@ import {
   Request,
   UnauthorizedException,
   Query,
+  Body,
+  Post,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service.js';
 import { Store } from '../../db/store.js';
@@ -157,7 +159,7 @@ export class ChatsController {
 
     talks.data.items = filteredItems;
 
-    console.debug('ServeGetTalkList talks', talks);
+    console.debug('ServeGetTalkList talks', talks.data.items.length);
     return talks;
   }
 
@@ -378,7 +380,40 @@ export class ChatsController {
       })
       .filter((item: boolean) => item !== false);
     records.data.items = items;
-    console.debug('records', records);
+    console.debug('records', records.data.items.length);
     return records;
+  }
+
+  @Post('unread/clear')
+  async clearUnread(@Body() body: any): Promise<any> {
+    console.debug('ServeClearUnread', body);
+    return { code: 200, message: 'success', data: {} };
+  }
+
+  @Post('talk/create')
+  async createTalk(
+    @Body() body: { receiver_id: string; talk_type: string },
+  ): Promise<any> {
+    console.debug('ServeCreateTalk', body);
+    return {
+      code: 200,
+      message: 'success',
+      data: {
+        avatar:
+          'https://im.gzydong.com/public/media/image/avatar/20230530/f76a14ce98ca684752df742974f5473a_200x200.png',
+        id: 36127,
+        is_disturb: 0,
+        is_online: 0,
+        is_robot: 0,
+        is_top: 0,
+        msg_text: '[系统消息]',
+        name: '老牛逼了1',
+        receiver_id: 2055,
+        remark_name: '老牛逼了1',
+        talk_type: 1,
+        unread_num: 1,
+        updated_at: '2023-11-24 17:44:29',
+      },
+    };
   }
 }

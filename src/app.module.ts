@@ -11,14 +11,24 @@ import { ContactsModule } from './modules/contacts/contacts.module';
 import { ChatsController } from './modules/chats/chats.controller';
 import { ChatsService } from './modules/chats/chats.service';
 import { ChatsModule } from './modules/chats/chats.module';
+import { EmoticonController } from './modules/emoticons/emoticon.controller';
+import { EmoticonModule } from './modules/emoticons/emoticon.module';
 
 @Module({
-  imports: [RoomsModule, AuthModule, UsersModule, ContactsModule, ChatsModule],
+  imports: [
+    RoomsModule,
+    AuthModule,
+    UsersModule,
+    ContactsModule,
+    ChatsModule,
+    EmoticonModule,
+  ],
   controllers: [
     AppController,
     UsersController,
     ContactsController,
     ChatsController,
+    EmoticonController,
   ],
   providers: [AppService, ContactsService, ChatsService],
 })
