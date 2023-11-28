@@ -15,7 +15,7 @@ export class RoomsController {
   @Get('list')
   async findAll(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -642,7 +642,7 @@ export class RoomsController {
   ): Promise<string> {
     console.debug(query);
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -927,7 +927,7 @@ export class RoomsController {
   @Get('apply/records')
   async findApplyRecords(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -1007,7 +1007,7 @@ export class RoomsController {
   @Get('apply/all')
   async findApplyAll(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
