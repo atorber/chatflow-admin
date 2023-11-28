@@ -27,7 +27,7 @@ export class ChatsController {
       baseId: db.dataBaseIds.messageSheet, // 设置 base ID
     });
     const res = await ChatsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     const talks: any = {
       code: 200,
       message: 'success',
@@ -384,6 +384,171 @@ export class ChatsController {
     return records;
   }
 
+  @Get('records/history')
+  async getTalkRecordsHistory(
+    @Query()
+    query: {
+      talk_type: 1 | 2;
+      receiver_id: string;
+      record_id: string;
+      msg_type: 1 | 3 | 4 | 5 | 6 | 2 | 7;
+      limit: string;
+    },
+  ) {
+    console.debug('ServeGetTalkRecordsHistory', query);
+    return {
+      code: 200,
+      message: 'success',
+      data: {
+        items: [
+          {
+            id: 14927,
+            sequence: 8,
+            msg_id: '8964622062c3add87a2b1775ffe5f084',
+            talk_type: 1,
+            msg_type: 4,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '',
+            created_at: '2023-11-24 22:36:59',
+            extra: {
+              duration: 0,
+              name: '',
+              size: 548908,
+              suffix: 'wav',
+              url: 'https://im.gzydong.com/public/media/20231124/b1b8535faae447c8394c18998ee0d480.wav',
+            },
+          },
+          {
+            id: 14926,
+            sequence: 7,
+            msg_id: 'd36619e1b05749ad897e002572c7d68e',
+            talk_type: 1,
+            msg_type: 2,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '',
+            created_at: '2023-11-24 22:35:29',
+            extra: {
+              code: '{\n  "123": 123\n}',
+              lang: 'json',
+            },
+          },
+          {
+            id: 14925,
+            sequence: 6,
+            msg_id: '43e79cb66ba2ee087e4fdd67a8e5d751',
+            talk_type: 1,
+            msg_type: 6,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '',
+            created_at: '2023-11-24 22:30:34',
+            extra: {
+              drive: 1,
+              name: '3.9.2.23发送名片消息.e',
+              path: 'private/files/talks/20231124/c6677904291590f963d96cbd58882409.e',
+              size: 1718438,
+              suffix: 'e',
+            },
+          },
+          {
+            id: 14924,
+            sequence: 5,
+            msg_id: '0d21858f11da4e0fa716c93a3e67f6b0',
+            talk_type: 1,
+            msg_type: 3,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '',
+            created_at: '2023-11-24 22:27:15',
+            extra: {
+              height: 4000,
+              name: '',
+              size: 0,
+              suffix: '',
+              url: 'https://im.gzydong.com/public/media/image/common/20231124/ae79f453eafe793f33ef43299f112b3e_2252x4000.jpg',
+              width: 2252,
+            },
+          },
+          {
+            id: 14923,
+            sequence: 4,
+            msg_id: 'a6e47ae2d888466bb6bd79b461cc5eeb',
+            talk_type: 1,
+            msg_type: 1,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '[鄙视]',
+            created_at: '2023-11-24 22:24:21',
+            extra: {},
+          },
+          {
+            id: 14922,
+            sequence: 3,
+            msg_id: '8edba7aa55f44ea7a958ee0dfbacb552',
+            talk_type: 1,
+            msg_type: 1,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '123',
+            created_at: '2023-11-24 22:17:23',
+            extra: {},
+          },
+          {
+            id: 14915,
+            sequence: 2,
+            msg_id: '91d44dcdd0f946b29ad113e7a311ce74',
+            talk_type: 1,
+            msg_type: 1,
+            user_id: 4559,
+            receiver_id: 2055,
+            nickname: '超哥',
+            avatar: '',
+            is_revoke: 0,
+            is_mark: 0,
+            is_read: 0,
+            content: '123',
+            created_at: '2023-11-24 18:58:17',
+            extra: {},
+          },
+        ],
+        limit: 30,
+        record_id: 2,
+      },
+    };
+  }
+
   @Post('unread/clear')
   async clearUnread(@Body() body: any): Promise<any> {
     console.debug('ServeClearUnread', body);
@@ -415,5 +580,59 @@ export class ChatsController {
         updated_at: '2023-11-24 17:44:29',
       },
     };
+  }
+
+  @Post('message/publish')
+  async publishMessage(@Body() body: any): Promise<any> {
+    const data = {
+      text: {
+        content: '123',
+        mention: { all: 0, uids: [] },
+        quote_id: '',
+        receiver: { receiver_id: 2055, talk_type: 1 },
+        type: 'text',
+      },
+      表情: {
+        content: '[鄙视]',
+        mention: { all: 0, uids: [] },
+        quote_id: '',
+        receiver: { receiver_id: 2055, talk_type: 1 },
+        type: 'text',
+      },
+      image: {
+        height: 4000,
+        receiver: { receiver_id: 2055, talk_type: 1 },
+        size: 10000,
+        type: 'image',
+        url: 'https://im.gzydong.com/public/media/image/common/20231124/ae79f453eafe793f33ef43299f112b3e_2252x4000.jpg',
+        width: 2252,
+      },
+      code: {
+        type: 'code',
+        code: '{\n  "123": 123\n}',
+        lang: 'json',
+        receiver: {
+          receiver_id: 2055,
+          talk_type: 1,
+        },
+      },
+    };
+    console.debug('ServePublishMessage', data);
+
+    console.debug('ServePublishMessage', body);
+    return { code: 200, message: 'success' };
+  }
+
+  @Post('message/file')
+  async uploadFile(
+    @Body() body: { upload_id: string; receiver_id: string; talk_type: 1 | 2 },
+  ): Promise<any> {
+    // {
+    //   "upload_id": "1700836233fa2e0dca0271837531ebc0506c525ea6",
+    //   "receiver_id": 2055,
+    //   "talk_type": 1
+    // }
+    console.debug('ServeUploadFile', body);
+    return { code: 200, message: 'success' };
   }
 }

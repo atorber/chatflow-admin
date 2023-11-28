@@ -12,10 +12,13 @@ export class AuthController {
   async login(
     @Body() signInDto: { password: string; mobile: string; platform?: string },
   ) {
+    console.log(signInDto);
+
     const access_token_res = await this.authService.signIn(
       signInDto.mobile,
       signInDto.password,
     );
+    console.info(access_token_res);
     if (access_token_res.access_token) {
       return {
         code: 200,

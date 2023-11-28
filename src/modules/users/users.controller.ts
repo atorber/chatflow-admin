@@ -33,6 +33,7 @@ export class UsersController {
         mobile: '13800138000',
         motto: '...',
         nickname: '老牛逼了',
+        hash: db.hash,
       },
     };
 
@@ -70,9 +71,8 @@ export class UsersController {
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
-    const res = await UsersService.findByField('key', 'BASE_BOT_ID');
-
-    console.debug('ServeLoginVika:', res);
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
 
     const userInfo: any = {
       code: 200,
@@ -94,6 +94,7 @@ export class UsersController {
           motto: '',
           nickname: db.nickname,
           uid: db.id,
+          hash: db.hash,
         },
       },
     };

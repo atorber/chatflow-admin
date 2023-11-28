@@ -3,6 +3,7 @@ import { ICreateRecordsReqParams, Vika } from '@vikadata/vika';
 import type { Sheets } from './vikaModel/Model.js';
 import { sheets } from './vikaModel/index.js';
 import { delay } from '../utils/utils.js';
+import { SHA256 } from 'crypto-js';
 
 export type VikaConfig = {
   spaceId: string;
@@ -62,6 +63,7 @@ export class VikaDB {
   dataBaseIds: DateBase;
   dataBaseNames: DateBase;
   isReady: boolean = true;
+  hash: string;
 
   constructor(config?: VikaConfig) {
     if (config) this.init(config);
@@ -99,6 +101,9 @@ export class VikaDB {
         // );
 
         if (tables) {
+          const client = config.token + config.spaceId;
+          console.debug(client);
+          this.hash = SHA256(client).toString();
           await delay(1000);
 
           for (const k in sheets) {

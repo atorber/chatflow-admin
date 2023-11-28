@@ -117,6 +117,26 @@ export class RoomsController {
     return group;
   }
 
+  @Post('create')
+  async createGroup(
+    @Body()
+    body: {
+      avatar: string;
+      name: string;
+      profile: string;
+      ids: string;
+    },
+  ): Promise<any> {
+    // {
+    //   "avatar": "",
+    //   "name": "测试群",
+    //   "profile": "",
+    //   "ids": "2055,3019,3045"
+    // }
+    console.debug(body);
+    return { code: 200, message: 'success', data: { group_id: 1040 } };
+  }
+
   @Post('invite')
   async memberInvite(
     @Body() body: { group_id: string; ids: string },
