@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ChatsService } from './chats.service.js';
 import { Store } from '../../db/store.js';
+import mqtt from 'mqtt';
 
 @Controller('api/v1/talk')
 export class ChatsController {
@@ -583,44 +584,119 @@ export class ChatsController {
   }
 
   @Post('message/publish')
-  async publishMessage(@Body() body: any): Promise<any> {
-    const data = {
-      text: {
-        content: '123',
-        mention: { all: 0, uids: [] },
-        quote_id: '',
-        receiver: { receiver_id: 2055, talk_type: 1 },
-        type: 'text',
-      },
-      表情: {
-        content: '[鄙视]',
-        mention: { all: 0, uids: [] },
-        quote_id: '',
-        receiver: { receiver_id: 2055, talk_type: 1 },
-        type: 'text',
-      },
-      image: {
-        height: 4000,
-        receiver: { receiver_id: 2055, talk_type: 1 },
-        size: 10000,
-        type: 'image',
-        url: 'https://im.gzydong.com/public/media/image/common/20231124/ae79f453eafe793f33ef43299f112b3e_2252x4000.jpg',
-        width: 2252,
-      },
-      code: {
-        type: 'code',
-        code: '{\n  "123": 123\n}',
-        lang: 'json',
-        receiver: {
-          receiver_id: 2055,
-          talk_type: 1,
-        },
-      },
-    };
-    console.debug('ServePublishMessage', data);
-
+  async publishMessage(@Body() body: any, @Request() req: any): Promise<any> {
     console.debug('ServePublishMessage', body);
-    return { code: 200, message: 'success' };
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+
+    // const data = {
+    //   text: {
+    //     content: '123',
+    //     mention: { all: 0, uids: [] },
+    //     quote_id: '',
+    //     receiver: { receiver_id: 2055, talk_type: 1 },
+    //     type: 'text',
+    //   },
+    //   表情: {
+    //     content: '[鄙视]',
+    //     mention: { all: 0, uids: [] },
+    //     quote_id: '',
+    //     receiver: { receiver_id: 2055, talk_type: 1 },
+    //     type: 'text',
+    //   },
+    //   image: {
+    //     height: 4000,
+    //     receiver: { receiver_id: 2055, talk_type: 1 },
+    //     size: 10000,
+    //     type: 'image',
+    //     url: 'https://im.gzydong.com/public/media/image/common/20231124/ae79f453eafe793f33ef43299f112b3e_2252x4000.jpg',
+    //     width: 2252,
+    //   },
+    //   code: {
+    //     type: 'code',
+    //     code: '{\n  "123": 123\n}',
+    //     lang: 'json',
+    //     receiver: {
+    //       receiver_id: 2055,
+    //       talk_type: 1,
+    //     },
+    //   },
+    // };
+    // console.debug('ServePublishMessage', data);
+
+    // 连接到MQTT服务器
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      password: '',
+      username: '',
+    });
+    const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
+    const publishPayload: any = ChatsService.formatMsgToWechaty(body);
+
+    return new Promise<any>((resolve) => {
+      // 设置15秒超时
+      const timeout: any = setTimeout(() => {
+        const responsePayload = {
+          status: 408,
+          body: { error: 'Request timed out' },
+        };
+        client.end();
+        resolve(responsePayload);
+      }, 5000);
+
+      client.on('connect', () => {
+        client.subscribe(publishTopic, (err: any) => {
+          if (err) {
+            const responsePayload = {
+              status: 500,
+              body: { error: 'Failed to subscribe to topic' },
+            };
+            client.end();
+            resolve(responsePayload);
+            return;
+          }
+
+          client.publish(publishTopic, publishPayload, (err: any) => {
+            if (err) {
+              const responsePayload = {
+                status: 500,
+                body: { error: 'Failed to publish to topic' },
+              };
+              client.end();
+              resolve(responsePayload);
+            }
+          });
+        });
+      });
+
+      client.on('message', (topic: any, message: { toString: () => any }) => {
+        if (topic === publishTopic) {
+          const messageText = message.toString();
+          const messagePayload = JSON.parse(messageText);
+
+          if (messagePayload.reqId === JSON.parse(publishPayload).reqId) {
+            clearTimeout(timeout);
+            const responsePayload = { code: 200, message: 'success' };
+            client.end();
+            resolve(responsePayload);
+          }
+        }
+      });
+
+      client.on('error', (err: { message: any }) => {
+        const responsePayload = {
+          status: 500,
+          body: { error: err.message },
+        };
+        client.end();
+        resolve(responsePayload);
+      });
+    });
+    // return { code: 200, message: 'success' }
   }
 
   @Post('message/file')

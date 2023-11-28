@@ -13,7 +13,7 @@ export class UsersController {
   @Get('detail')
   async getProfile(@Request() req: any) {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -60,7 +60,7 @@ export class UsersController {
   @Get('setting')
   async getSetting(@Request() req: any) {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {

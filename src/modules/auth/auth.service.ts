@@ -30,7 +30,7 @@ export class AuthService {
 
   async signIn(username: string, pass: string) {
     let user = await this.usersService.findOne(username);
-    console.debug('ServeLoginVika:', user);
+    // console.debug('ServeLoginVika:', user);
 
     // 如果用户不存在，则验证并创建用户
     const userNew = new VikaDB();
