@@ -1,8 +1,8 @@
 /* eslint-disable sort-keys */
 import { ICreateRecordsReqParams, Vika } from '@vikadata/vika';
 import type { Sheets } from './vikaModel/Model.js';
-import { sheets } from './vikaModel/index.js';
-import { delay } from '../utils/utils.js';
+import { sheets } from './vikaModel/index';
+import { delay } from '../utils/utils';
 import { SHA256 } from 'crypto-js';
 
 export type VikaConfig = {

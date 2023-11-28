@@ -15,7 +15,7 @@ export class ContactsController {
   @Get('list')
   async findAll(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -27,7 +27,7 @@ export class ContactsController {
       baseId: db.dataBaseIds.contactSheet, // 设置 base ID
     });
     const res = await ContactsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     const contacts: any = {
       code: 200,
       message: 'success',
@@ -129,7 +129,7 @@ export class ContactsController {
   @Get('group/list')
   async findGroup(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -141,7 +141,7 @@ export class ContactsController {
       baseId: db.dataBaseIds.contactSheet, // 设置 base ID
     });
     const res = await ContactsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     let contacts: any = {
       code: 200,
       message: 'success',
@@ -204,7 +204,7 @@ export class ContactsController {
   @Get('apply/records')
   async findApplyRecords(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -216,7 +216,7 @@ export class ContactsController {
       baseId: db.dataBaseIds.contactSheet, // 设置 base ID
     });
     const res = await ContactsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     let contacts: any = {
       code: 200,
       message: 'success',

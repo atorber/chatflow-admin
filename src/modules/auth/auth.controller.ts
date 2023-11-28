@@ -1,7 +1,5 @@
-import { Controller, Post, Get, Body, Query } from '@nestjs/common';
-import { VikaDB } from '../../db/vika-db';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Store } from '../../db/store';
 import { Public } from './decorators/public.decorator';
 
 @Controller('api/v1/auth')
@@ -48,43 +46,5 @@ export class AuthController {
       message: 'success',
       data: {},
     };
-  }
-
-  @Public()
-  @Get('login')
-  async loginGet(
-    @Query() query: { password: string; mobile: string; platform?: string },
-  ) {
-    console.info(query);
-    if (!query.password || !query.mobile) {
-      return {
-        code: 400,
-        message: 'error',
-        data: '用户名或者密码不能为空',
-      };
-    }
-    const user = new VikaDB();
-    const space = await user.init({
-      token: query.password,
-      spaceId: query.mobile,
-    });
-
-    console.info(space);
-    const userID = space.code === 200 ? space.data : false;
-    if (userID) {
-      Store.addUser(user);
-      console.info('登录成功', Store.users);
-      return {
-        code: 200,
-        message: 'success',
-        data: {
-          access_token: space.data,
-          expires_in: 36000000,
-          type: 'Bearer',
-        },
-      };
-    } else {
-      return space;
-    }
   }
 }

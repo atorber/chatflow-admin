@@ -1,18 +1,18 @@
 enum FieldType {
-    SingleText = 'SingleText',
-    SingleSelect = 'SingleSelect',
-    Text = 'Text',
-    Attachment = 'Attachment'
+  SingleText = 'SingleText',
+  SingleSelect = 'SingleSelect',
+  Text = 'Text',
+  Attachment = 'Attachment',
 }
 
 type Field = {
-    id?:string,
-    name: string,
-    type: string,
-    property?: any,
-    desc?: string,
-    editable?: boolean,
-    isPrimary?: boolean,
+  id?: string;
+  name: string;
+  type: string;
+  property?: any;
+  desc?: string;
+  editable?: boolean;
+  isPrimary?: boolean;
 };
 
 type FieldSingleText = Field & { type: FieldType.SingleText };
@@ -20,20 +20,20 @@ type FieldSingleSelect = Field & { type: FieldType.SingleSelect };
 type FieldText = Field & { type: FieldType.Text };
 
 type Record = {
-    fields: {
-        [key: string]: string
-    }
-}
+  fields: {
+    [key: string]: string;
+  };
+};
 
 type Sheet = {
-    fields: Field[],
-    name: string,
-    defaultRecords: Record[]
-}
+  fields: Field[];
+  name: string;
+  defaultRecords: Record[];
+};
 
 type Sheets = {
-    [key: string]: Sheet
-}
+  [key: string]: Sheet;
+};
 
 export {
   FieldType,
@@ -44,4 +44,4 @@ export {
   type Record,
   type Sheet,
   type Sheets,
-}
+};

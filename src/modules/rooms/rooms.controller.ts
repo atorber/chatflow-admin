@@ -27,7 +27,7 @@ export class RoomsController {
       baseId: db.dataBaseIds.roomSheet, // 设置 base ID
     });
     const res = await RoomsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     const groups: any = {
       code: 200,
       message: 'success',
@@ -654,7 +654,7 @@ export class RoomsController {
       baseId: db.dataBaseIds.roomSheet, // 设置 base ID
     });
     const res = await RoomsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     let groups: any = {
       code: 200,
       message: 'success',
@@ -939,7 +939,7 @@ export class RoomsController {
       baseId: db.dataBaseIds.contactSheet, // 设置 base ID
     });
     const res = await RoomsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     let contacts: any = {
       code: 200,
       message: 'success',
@@ -1019,7 +1019,7 @@ export class RoomsController {
       baseId: db.dataBaseIds.contactSheet, // 设置 base ID
     });
     const res = await RoomsService.findAll();
-    console.debug(res);
+    // console.debug(res);
     let contacts: any = {
       code: 200,
       message: 'success',

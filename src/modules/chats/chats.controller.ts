@@ -15,7 +15,7 @@ export class ChatsController {
   @Get('list')
   async findAll(@Request() req: any): Promise<string> {
     const user = req.user;
-    console.debug(user);
+    // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
     if (!db) {
@@ -249,7 +249,7 @@ export class ChatsController {
         `({接收人ID|listenerid}="${data.receiver_id}"&&{好友ID|wxid}="${data.record_id}")||({接收人ID|listenerid}="${data.record_id}"&&{好友ID|wxid}="${data.receiver_id}")`,
       );
     }
-    console.debug('vika res', res);
+    // console.debug('vika res', res);
     const items = res
       .map((value: any) => {
         const { recordId } = value;
