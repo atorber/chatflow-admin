@@ -138,6 +138,47 @@ export class UsersController {
     return userInfo;
   }
 
+  @Get('config/group')
+  async getConfigGroup(@Request() req: any) {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    UsersService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
+
+    const res = await UsersService.findAll();
+    const data: any = {};
+    res.forEach((item: any) => {
+      const field = item.fields;
+      field.id = item.recordId;
+      const group = field.name.split('-')[0];
+      field.name = field.name.split('-')[1];
+      if (data[group]) {
+        data[group].push(field);
+      } else {
+        data[group] = [field];
+      }
+    });
+
+    const userInfo: any = {
+      code: 200,
+      message: 'success',
+      data,
+    };
+
+    console.debug('userInfo:', userInfo);
+    return userInfo;
+  }
+
   @Post('config')
   async setConfig(@Request() req: any, @Body() body: any) {
     console.debug('setConfig body:', body);
