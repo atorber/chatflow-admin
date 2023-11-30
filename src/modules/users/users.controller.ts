@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -97,6 +98,75 @@ export class UsersController {
           hash: db.hash,
         },
       },
+    };
+
+    console.debug('userInfo:', userInfo);
+    return userInfo;
+  }
+
+  @Get('config')
+  async getConfig(@Request() req: any) {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    UsersService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
+
+    const res = await UsersService.findAll();
+    const data = res.map((item: any) => {
+      const field = item.fields;
+      field.id = item.recordId;
+      return field;
+    });
+
+    const userInfo: any = {
+      code: 200,
+      message: 'success',
+      data,
+    };
+
+    console.debug('userInfo:', userInfo);
+    return userInfo;
+  }
+
+  @Post('config')
+  async setConfig(@Request() req: any, @Body() body: any) {
+    console.debug('setConfig body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    UsersService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
+
+    const res = await UsersService.findAll();
+    const data = res.map((item: any) => {
+      const field = item.fields;
+      field.id = item.recordId;
+      return field;
+    });
+
+    const userInfo: any = {
+      code: 200,
+      message: 'success',
+      data,
     };
 
     console.debug('userInfo:', userInfo);
