@@ -159,6 +159,11 @@ export class UsersController {
     const data: any = {};
     res.forEach((item: any) => {
       const field = item.fields;
+      if (field.value === 'true') {
+        field.value = true;
+      } else if (field.value === 'false') {
+        field.value = false;
+      }
       field.id = item.recordId;
       const group = field.name.split('-')[0];
       field.name = field.name.split('-')[1];
@@ -197,20 +202,12 @@ export class UsersController {
     // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
     // console.debug('ServeLoginVika:', res);
 
-    const res = await UsersService.findAll();
-    const data = res.map((item: any) => {
-      const field = item.fields;
-      field.id = item.recordId;
-      return field;
-    });
-
-    const userInfo: any = {
+    const data: any = {
       code: 200,
       message: 'success',
-      data,
+      data: {},
     };
 
-    console.debug('userInfo:', userInfo);
-    return userInfo;
+    return data;
   }
 }
