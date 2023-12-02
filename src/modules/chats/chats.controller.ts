@@ -10,6 +10,7 @@ import {
 import { ChatsService } from './chats.service.js';
 import { Store } from '../../db/store.js';
 import mqtt from 'mqtt';
+import { v4 } from 'uuid';
 
 @Controller('api/v1/talk')
 export class ChatsController {
@@ -701,7 +702,14 @@ export class ChatsController {
 
   @Post('message/file')
   async uploadFile(
-    @Body() body: { upload_id: string; receiver_id: string; talk_type: 1 | 2 },
+    @Body()
+    body: {
+      upload_id: string;
+      receiver_id: string;
+      talk_type: 1 | 2;
+      url: string;
+    },
+    @Request() req: any,
   ): Promise<any> {
     // {
     //   "upload_id": "1700836233fa2e0dca0271837531ebc0506c525ea6",
@@ -709,6 +717,97 @@ export class ChatsController {
     //   "talk_type": 1
     // }
     console.debug('ServeUploadFile', body);
-    return { code: 200, message: 'success' };
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+
+    // 连接到MQTT服务器
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      password: '',
+      username: '',
+    });
+    const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
+    let publishPayload: any = {
+      reqId: v4(),
+      method: 'thing.command.invoke',
+      version: '1.0',
+      timestamp: new Date().getTime(),
+      name: 'send',
+      params: {
+        toContacts: [body.receiver_id],
+        messageType: 'Attachment',
+        messagePayload:
+          body.url.indexOf('http') === 0 || body.url.indexOf('https') === 0
+            ? body.url
+            : `https://${body.url}`,
+      },
+    };
+
+    publishPayload = JSON.stringify(publishPayload);
+
+    return new Promise<any>((resolve) => {
+      // 设置15秒超时
+      const timeout: any = setTimeout(() => {
+        const responsePayload = {
+          status: 408,
+          body: { error: 'Request timed out' },
+        };
+        client.end();
+        resolve(responsePayload);
+      }, 5000);
+
+      client.on('connect', () => {
+        client.subscribe(publishTopic, (err: any) => {
+          if (err) {
+            const responsePayload = {
+              status: 500,
+              body: { error: 'Failed to subscribe to topic' },
+            };
+            client.end();
+            resolve(responsePayload);
+            return;
+          }
+
+          client.publish(publishTopic, publishPayload, (err: any) => {
+            if (err) {
+              const responsePayload = {
+                status: 500,
+                body: { error: 'Failed to publish to topic' },
+              };
+              client.end();
+              resolve(responsePayload);
+            }
+          });
+        });
+      });
+
+      client.on('message', (topic: any, message: { toString: () => any }) => {
+        if (topic === publishTopic) {
+          const messageText = message.toString();
+          const messagePayload = JSON.parse(messageText);
+
+          if (messagePayload.reqId === JSON.parse(publishPayload).reqId) {
+            clearTimeout(timeout);
+            const responsePayload = { code: 200, message: 'success' };
+            client.end();
+            resolve(responsePayload);
+          }
+        }
+      });
+
+      client.on('error', (err: { message: any }) => {
+        const responsePayload = {
+          status: 500,
+          body: { error: err.message },
+        };
+        client.end();
+        resolve(responsePayload);
+      });
+    });
+    // return { code: 200, message: 'success' }
   }
 }

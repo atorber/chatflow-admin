@@ -64,6 +64,14 @@ export class VikaDB {
   dataBaseNames: DateBase;
   isReady: boolean = true;
   hash: string;
+  config: {
+    [key: string]: any;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+    region?: string;
+    endpoint?: string;
+    bucketName?: string;
+  };
 
   constructor(config?: VikaConfig) {
     if (config) this.init(config);
@@ -91,6 +99,7 @@ export class VikaDB {
       qaSheet: '',
     };
     this.dataBaseNames = { ...this.dataBaseIds };
+    this.config = {};
 
     try {
       if (this.spaceId) {

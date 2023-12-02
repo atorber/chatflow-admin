@@ -13,6 +13,7 @@ import { ChatsService } from './modules/chats/chats.service';
 import { ChatsModule } from './modules/chats/chats.module';
 import { EmoticonController } from './modules/emoticons/emoticon.controller';
 import { EmoticonModule } from './modules/emoticons/emoticon.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EmoticonModule } from './modules/emoticons/emoticon.module';
     ContactsModule,
     ChatsModule,
     EmoticonModule,
+    UploadModule,
   ],
   controllers: [
     AppController,

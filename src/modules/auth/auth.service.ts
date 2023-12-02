@@ -46,18 +46,22 @@ export class AuthService {
         apiKey: user.token,
         baseId: user.dataBaseIds.envSheet, // 设置 base ID
       });
-      const resBotId = await UsersService.findByField('key', 'BASE_BOT_ID');
-      const BASE_BOT_ID: any = resBotId[0];
+      const resEnv = await UsersService.findAll();
+      console.debug('ServeLoginVika:', resEnv);
+      const config: any = {};
+      resEnv.map((item: any) => {
+        config[item.fields.key] = item.fields.value || undefined;
+      });
+      const BASE_BOT_ID: string = config['BASE_BOT_ID'] || '';
       // console.debug('ServeLoginVika:', BASE_BOT_ID);
+      userNew.id = BASE_BOT_ID;
 
-      userNew.id = BASE_BOT_ID.fields.value || undefined;
-      delay(500);
-      const resBotName = await UsersService.findByField('key', 'BASE_BOT_NAME');
-      const BASE_BOT_NAME: any = resBotName[0];
+      const BASE_BOT_NAME: string = config['BASE_BOT_NAME'] || '';
       // console.debug('ServeLoginVika:', BASE_BOT_NAME);
 
-      userNew.nickname = BASE_BOT_NAME.fields.value || undefined;
+      userNew.nickname = BASE_BOT_NAME || '';
       userNew.password = pass;
+      userNew.config = config;
       Store.addUser(userNew);
       const payload = {
         username: user.username,
