@@ -42,7 +42,7 @@ export class UploadController {
       region: db.config.region,
       endpoint: db.config.endpoint,
     });
-    const file_name = file.originalname;
+    const file_name = `send/${file.originalname}`;
     const bucketName = db.config.bucketName;
     if (bucketName) {
       const uploadResult = await UploadService.uploadToS3(
@@ -90,7 +90,7 @@ export class UploadController {
 
     const uploadParams = {
       Bucket: db.config.bucketName || '',
-      Key: body.file_name, // 设置文件的唯一标识
+      Key: `send/${body.file_name}`, // 设置文件的唯一标识
     };
 
     try {
@@ -146,7 +146,7 @@ export class UploadController {
 
     const uploadParams = {
       Bucket: db.config.bucketName || '',
-      Key: body.file_name,
+      Key: `send/${body.file_name}`,
       PartNumber: Number(body.split_num), // 分片序号
       UploadId: body.upload_id, // 分片上传的uploadId
       Body: file.buffer, // 分片文件
@@ -157,7 +157,7 @@ export class UploadController {
       console.debug('分片上传：', res);
       const completeParams = {
         Bucket: db.config.bucketName || '',
-        Key: body.file_name, // 这个键应该与初始化和上传分片时使用的一致
+        Key: `send/${body.file_name}`, // 这个键应该与初始化和上传分片时使用的一致
         UploadId: body.upload_id,
         MultipartUpload: {
           Parts: [
