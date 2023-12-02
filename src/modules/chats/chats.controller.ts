@@ -266,6 +266,7 @@ export class ChatsController {
           wxAvatar,
           file,
         } = value.fields;
+        if (file) console.debug('文件消息 file', file);
         const { wxid, listenerid } = value.fields;
         const user_id = wxid;
         const dispayname = alias || name;
@@ -280,20 +281,33 @@ export class ChatsController {
           width: 4480,
         };
         const receiver_id = roomid !== '--' ? roomid : listenerid;
-        if (file) {
-          const file0 = file[0];
 
-          // const fileBase64 = await downloadImage(file0)
-          // console.debug(fileBase64)
+        // if (file) {
+        //   const file0 = file[0];
+        //   extra = {
+        //     height: file0.height,
+        //     name: file0.name,
+        //     size: file0.size,
+        //     suffix: file0.mimeType,
+        //     url: file0.url,
+        //     width: file0.width,
+        //   };
+        // }
 
-          extra = {
-            height: file0.height,
-            name: file0.name,
-            size: file0.size,
-            suffix: file0.mimeType,
-            url: file0.url,
-            width: file0.width,
-          };
+        if (['Image', 'Attachment', 'Video', 'Audio'].includes(messageType)) {
+          try {
+            const textObj = JSON.parse(messagePayload);
+            extra = {
+              height: 1000,
+              name: textObj.name,
+              size: 0,
+              suffix: '',
+              url: textObj.url,
+              width: 563,
+            };
+          } catch (e) {
+            console.debug('解析消息内容失败', e);
+          }
         }
 
         switch (messageType) {
