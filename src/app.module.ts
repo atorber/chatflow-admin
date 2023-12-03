@@ -14,6 +14,27 @@ import { ChatsModule } from './modules/chats/chats.module';
 import { EmoticonController } from './modules/emoticons/emoticon.controller';
 import { EmoticonModule } from './modules/emoticons/emoticon.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { NoticesService } from './modules/notices/notices.service';
+import { NoticesController } from './modules/notices/notices.controller';
+import { NoticesModule } from './modules/notices/notices.module';
+import { QasService } from './modules/qas/qas.service';
+import { QasController } from './modules/qas/qas.controller';
+import { QasModule } from './modules/qas/qas.module';
+import { GroupnoticesService } from './modules/groupnotices/groupnotices.service';
+import { GroupnoticesController } from './modules/groupnotices/groupnotices.controller';
+import { GroupnoticesModule } from './modules/groupnotices/groupnotices.module';
+import { WhitelistsService } from './modules/whitelists/whitelists.service';
+import { WhitelistsController } from './modules/whitelists/whitelists.controller';
+import { WhitelistsModule } from './modules/whitelists/whitelists.module';
+import { KeywordsService } from './modules/keywords/keywords.service';
+import { KeywordsController } from './modules/keywords/keywords.controller';
+import { KeywordsModule } from './modules/keywords/keywords.module';
+import { StatisticsService } from './modules/statistics/statistics.service';
+import { StatisticsController } from './modules/statistics/statistics.controller';
+import { StatisticsModule } from './modules/statistics/statistics.module';
+import { OrdersService } from './modules/orders/orders.service';
+import { OrdersController } from './modules/orders/orders.controller';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -24,6 +45,13 @@ import { UploadModule } from './modules/upload/upload.module';
     ChatsModule,
     EmoticonModule,
     UploadModule,
+    NoticesModule,
+    QasModule,
+    GroupnoticesModule,
+    WhitelistsModule,
+    KeywordsModule,
+    StatisticsModule,
+    OrdersModule,
   ],
   controllers: [
     AppController,
@@ -31,7 +59,25 @@ import { UploadModule } from './modules/upload/upload.module';
     ContactsController,
     ChatsController,
     EmoticonController,
+    NoticesController,
+    QasController,
+    GroupnoticesController,
+    WhitelistsController,
+    KeywordsController,
+    StatisticsController,
+    OrdersController,
   ],
-  providers: [AppService, ContactsService, ChatsService],
+  providers: [
+    AppService,
+    ContactsService,
+    ChatsService,
+    NoticesService,
+    QasService,
+    GroupnoticesService,
+    WhitelistsService,
+    KeywordsService,
+    StatisticsService,
+    OrdersService,
+  ],
 })
 export class AppModule {}

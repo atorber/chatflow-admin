@@ -79,6 +79,10 @@ export class ChatsService extends BaseEntity {
         messageType = 'Text';
         messagePayload = data.content;
         break;
+      case 'code':
+        messageType = 'Text';
+        messagePayload = '```' + data.lang + '\n' + data.code + '\n' + '```';
+        break;
       case 'image':
         messagePayload = data.url;
         messageType = 'Image';
