@@ -3,23 +3,17 @@ import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 Bas
 
 @Injectable()
 export class GroupnoticesService extends BaseEntity {
-  desc?: string; // 定义名字属性，可选
-
-  id?: string;
-
-  alias?: string;
-
-  time?: number;
-
-  cycle?: string;
-
-  state?: string;
-
-  syncStatus?: string;
-
-  lastOperationTime?: string;
-
-  action?: string;
+  text: string; // 内容
+  type: string; // 类型
+  alias: string; // 好友备注(选填)
+  name: string; // 昵称/群名称
+  id: string; // 好友ID/群ID(选填)
+  state: string; // 状态
+  pubTime: string; // 发送时间
+  info: string; // 信息
+  syncStatus: string; // 同步状态
+  lastOperationTime: string; // 最后操作时间
+  action: string; // 操作
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
 
@@ -27,16 +21,19 @@ export class GroupnoticesService extends BaseEntity {
     // 定义字段映射选项
     fieldMapping: {
       // 字段映射
-      desc: '内容|desc',
+      text: '内容|text',
+      type: '类型|type',
       alias: '好友备注(选填)|alias',
-      time: '时间|time',
-      cycle: '周期|cycle',
-      state: '启用状态|state',
+      name: '昵称/群名称|name',
+      id: '好友ID/群ID(选填)|id',
+      state: '状态|state',
+      pubTime: '发送时间|pubTime',
+      info: '信息|info',
       syncStatus: '同步状态|syncStatus',
       lastOperationTime: '最后操作时间|lastOperationTime',
       action: '操作|action',
     },
-    tableName: '定时提醒|Notice', // 表名
+    tableName: '群发通知|GroupNotice', // 表名
   };
 
   protected static override getMappingOptions(): MappingOptions {
