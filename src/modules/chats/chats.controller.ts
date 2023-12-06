@@ -272,14 +272,7 @@ export class ChatsController {
         const dispayname = alias || name;
         const talk_type = roomid !== '--' ? 2 : 1;
         let msg_type = 1;
-        let extra = {
-          height: 6480,
-          name: '',
-          size: 0,
-          suffix: '',
-          url: 'https://im.gzydong.com/public/media/image/common/20231026/814423dea6ada99994ae87bb0fef545b_4480x6480.png',
-          width: 4480,
-        };
+        let extra = {};
         const receiver_id = roomid !== '--' ? roomid : listenerid;
 
         // if (file) {
