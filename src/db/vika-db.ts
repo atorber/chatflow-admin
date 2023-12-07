@@ -23,6 +23,8 @@ export interface DateBase {
   stockSheet: string;
   groupNoticeSheet: string;
   qaSheet: string;
+  chatBotSheet: string;
+  chatBotUserSheet: string;
 }
 
 export class KeyDisplaynameMap {
@@ -97,6 +99,8 @@ export class VikaDB {
       stockSheet: '',
       groupNoticeSheet: '',
       qaSheet: '',
+      chatBotSheet: '',
+      chatBotUserSheet: '',
     };
     this.dataBaseNames = { ...this.dataBaseIds };
     this.config = {};

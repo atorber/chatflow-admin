@@ -20,6 +20,8 @@ export const actionState = {
   statisticSheet: true,
   groupNoticeSheet: true,
   messageSheet: false,
+  chatBotSheet: false,
+  chatBotUserSheet: false,
 };
 
 export function replaceSyncStatus(fields: CustomObject[]): CustomObject[] {

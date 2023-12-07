@@ -245,10 +245,15 @@ export class ChatsController {
     let res: any = [];
 
     if (data.talk_type === '2') {
-      res = await ChatsService.findByField('roomid', data.receiver_id);
+      res = await ChatsService.findByField(
+        'roomid',
+        data.receiver_id,
+        data.limit,
+      );
     } else {
       res = await ChatsService.findByQuery(
         `({接收人ID|listenerid}="${data.receiver_id}"&&{好友ID|wxid}="${data.record_id}")||({接收人ID|listenerid}="${data.record_id}"&&{好友ID|wxid}="${data.receiver_id}")`,
+        data.limit,
       );
     }
     // console.debug('vika res', res);
@@ -266,6 +271,7 @@ export class ChatsController {
           wxAvatar,
           file,
         } = value.fields;
+        console.debug('消息messagePayload...', messagePayload);
         if (file) console.debug('文件消息 file', file);
         const { wxid, listenerid } = value.fields;
         const user_id = wxid;
@@ -379,7 +385,7 @@ export class ChatsController {
             is_revoke: 0,
             is_mark: 0,
             is_read: 0,
-            content: messagePayload,
+            content: messagePayload || '',
             created_at: timeHms,
             extra: extra,
             recordId: recordId,

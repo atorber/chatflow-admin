@@ -35,6 +35,9 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { OrdersService } from './modules/orders/orders.service';
 import { OrdersController } from './modules/orders/orders.controller';
 import { OrdersModule } from './modules/orders/orders.module';
+import { ChatbotsService } from './modules/chatbots/chatbots.service';
+import { ChatbotsController } from './modules/chatbots/chatbots.controller';
+import { ChatbotsModule } from './modules/chatbots/chatbots.module';
 
 @Module({
   imports: [
@@ -52,6 +55,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     KeywordsModule,
     StatisticsModule,
     OrdersModule,
+    ChatbotsModule,
   ],
   controllers: [
     AppController,
@@ -66,6 +70,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     KeywordsController,
     StatisticsController,
     OrdersController,
+    ChatbotsController,
   ],
   providers: [
     AppService,
@@ -78,6 +83,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     KeywordsService,
     StatisticsService,
     OrdersService,
+    ChatbotsService,
   ],
 })
 export class AppModule {}
