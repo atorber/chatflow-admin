@@ -190,11 +190,11 @@ export abstract class BaseEntity {
   ) {
     const datas = records.map((item) => {
       return {
-        fields: this.formatData(item),
+        fields: this.formatData(item.fields),
         recordId: item.recordId,
       };
     });
-
+    console.debug('updatEmultiple:', datas);
     try {
       const res = await this.datasheet.records.update(datas);
       if (!res.success) {
@@ -266,7 +266,7 @@ export abstract class BaseEntity {
       filterByFormula: `{${field}}="${value}"`,
       pageSize: pageSize,
     };
-    console.info('query:', JSON.stringify(query));
+    console.info('findByField:', JSON.stringify(query));
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query);
     if (response.success) {
@@ -289,7 +289,7 @@ export abstract class BaseEntity {
       filterByFormula,
       pageSize: pageSize,
     };
-    console.info('query:', JSON.stringify(query));
+    console.info('findByQuery:', JSON.stringify(query));
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query);
     if (response.success) {

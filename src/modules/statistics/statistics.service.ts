@@ -5,9 +5,11 @@ import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 Bas
 export class StatisticsService extends BaseEntity {
   _id?: string; // 定义名字属性，可选
   type?: string;
+  desc?: string;
   startTime?: number;
   duration?: number;
   maximum?: number;
+  location?: string;
   cycle?: number;
   topic?: string;
   roomid?: string;
@@ -24,9 +26,11 @@ export class StatisticsService extends BaseEntity {
       // 字段映射
       _id: '编号|_id',
       type: '类型|type',
+      desc: '描述|desc',
       startTime: '开始时间(选填)|startTime',
       duration: '时长(小时，选填)|duration',
       maximum: '限制人数(选填)|maximum',
+      location: '地点(选填)|location',
       cycle: '周期(选填)|cycle',
       topic: '关联群名称|topic',
       roomid: '关联群ID(选填)|roomid',

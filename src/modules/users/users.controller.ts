@@ -100,7 +100,7 @@ export class UsersController {
       },
     };
 
-    console.debug('userInfo:', userInfo);
+    console.debug('userInfo:', JSON.stringify(userInfo));
     return userInfo;
   }
 
@@ -128,14 +128,14 @@ export class UsersController {
       return field;
     });
 
-    const userInfo: any = {
+    const resInfo: any = {
       code: 200,
       message: 'success',
       data,
     };
 
-    console.debug('userInfo:', userInfo);
-    return userInfo;
+    console.debug('resInfo:', JSON.stringify(resInfo));
+    return resInfo;
   }
 
   @Get('config/group')
@@ -174,16 +174,17 @@ export class UsersController {
       }
     });
 
-    const userInfo: any = {
+    const resInfo: any = {
       code: 200,
       message: 'success',
       data,
     };
 
-    console.debug('userInfo:', userInfo);
-    return userInfo;
+    console.debug('userInfo:', JSON.stringify(resInfo));
+    return resInfo;
   }
 
+  // 批量更新配置信息
   @Post('config')
   async setConfig(@Request() req: any, @Body() body: any) {
     console.debug('setConfig body:', body);
@@ -199,14 +200,18 @@ export class UsersController {
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
-    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
-    // console.debug('ServeLoginVika:', res);
-
+    const res = await UsersService.updatEmultiple(body);
+    console.debug('update config:', res);
     const data: any = {
-      code: 200,
-      message: 'success',
+      code: 400,
+      message: 'fail',
       data: {},
     };
+    if (res.success) {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res;
+    }
 
     return data;
   }

@@ -1,6 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
+  Query,
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,7 +13,7 @@ import { Store } from '../../db/store.js';
 @Controller('api/v1/qa')
 export class QasController {
   @Get('list')
-  async findAll(@Request() req: any): Promise<string> {
+  async findAll(@Request() req: any, @Query() query: any): Promise<string> {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -23,7 +26,12 @@ export class QasController {
       apiKey: db.token,
       baseId: db.dataBaseIds.qaSheet, // 设置 base ID
     });
-    const data = await QasService.findAll();
+    let data: any = [];
+    if (query.keyword) {
+      data = await QasService.findByQuery(query.keyword);
+    } else {
+      data = await QasService.findAll();
+    }
     const items = data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
@@ -41,6 +49,89 @@ export class QasController {
         list: items,
       },
     };
+    return res;
+  }
+  @Post('create')
+  async create(@Body() body: any, @Request() req: any): Promise<string> {
+    console.debug('qa create', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    QasService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
+    });
+    const res: any = { code: 400, message: 'fail', data: {} };
+    try {
+      const resCreate: any = await QasService.create(body);
+      console.debug('resCreate', resCreate);
+      if (resCreate.recordId) {
+        res.code = 200;
+        res.message = 'success';
+        res.data = resCreate;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return res;
+  }
+  @Post('update')
+  async update(@Request() req: any): Promise<string> {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    QasService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
+    });
+    return '';
+  }
+  @Post('delete')
+  async delete(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('qa delete', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    QasService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
+    });
+
+    const resDel = await QasService.delete(body.recordId);
+    console.debug('qa resDel', resDel);
+
+    let res: any = '';
+    if (resDel.success) {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {},
+      };
+    } else {
+      res = {
+        code: 400,
+        message: 'error',
+        data: {},
+      };
+    }
     return res;
   }
 }

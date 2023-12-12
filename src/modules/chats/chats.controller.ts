@@ -271,7 +271,7 @@ export class ChatsController {
           wxAvatar,
           file,
         } = value.fields;
-        console.debug('消息messagePayload...', messagePayload);
+        // console.debug('消息messagePayload...', messagePayload);
         if (file) console.debug('文件消息 file', file);
         const { wxid, listenerid } = value.fields;
         const user_id = wxid;
@@ -822,5 +822,44 @@ export class ChatsController {
       });
     });
     // return { code: 200, message: 'success' }
+  }
+
+  @Post('delete')
+  async delete(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('qa delete', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    ChatsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
+    });
+
+    const resDel = await ChatsService.delete(body.recordId);
+    console.debug('qa resDel', resDel);
+
+    let res: any = '';
+    if (resDel.success) {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {},
+      };
+    } else {
+      res = {
+        code: 400,
+        message: 'error',
+        data: {},
+      };
+    }
+    return res;
   }
 }

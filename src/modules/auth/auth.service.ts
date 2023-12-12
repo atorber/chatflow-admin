@@ -47,7 +47,7 @@ export class AuthService {
         baseId: user.dataBaseIds.envSheet, // 设置 base ID
       });
       const resEnv = await UsersService.findAll();
-      console.debug('ServeLoginVika:', resEnv);
+      console.debug('ServeLoginVika:', resEnv.length);
       const config: any = {};
       resEnv.map((item: any) => {
         config[item.fields.key] = item.fields.value || undefined;
@@ -67,7 +67,7 @@ export class AuthService {
         username: user.username,
         sub: user.userId,
       };
-      console.debug(Store.users);
+      console.debug(Store.users.length);
       return {
         access_token: await this.jwtService.signAsync(payload),
       };

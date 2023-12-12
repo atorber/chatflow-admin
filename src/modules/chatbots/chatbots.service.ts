@@ -49,6 +49,7 @@ export class ChatbotUserService extends BaseEntity {
   botname: string;
   wxid: string;
   name: string;
+  alias: string;
   prompt: string;
   quota: string;
   state: string;
@@ -63,6 +64,7 @@ export class ChatbotUserService extends BaseEntity {
       botname: '昵称|botname',
       wxid: '用户ID|wxid',
       name: '用户名称|name',
+      alias: '好友备注(选填)|alias',
       prompt: '用户提示词|prompt',
       quota: '配额|quota',
       state: '启用状态|state',
