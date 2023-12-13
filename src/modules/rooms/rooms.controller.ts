@@ -9,6 +9,12 @@ import {
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service.js';
 import { Store } from '../../db/store.js';
+import mqtt from 'mqtt';
+import {
+  getKeyByBasicString,
+  encrypt,
+  decrypt,
+} from '../../utils/crypto-use-crypto-js.js';
 
 @Controller('api/v1/group')
 export class RoomsController {
@@ -70,7 +76,7 @@ export class RoomsController {
 
   @Get('detail')
   async findOne(@Query() query: { group_id: string }): Promise<string> {
-    console.debug(query);
+    console.debug('findOne', query);
     const id = query.group_id;
     console.debug('id', id);
     let group: any = {
@@ -113,7 +119,7 @@ export class RoomsController {
       };
     }
 
-    console.debug(group);
+    console.debug('group', group);
     return group;
   }
 
@@ -146,96 +152,122 @@ export class RoomsController {
   }
 
   @Get('member/list')
-  async findMembers(@Query() query: { group_id: string }): Promise<any> {
-    console.debug(query);
-    return {
-      code: 200,
-      message: 'success',
-      data: {
-        items: [
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/avatar/20231118/14dc84cf4870945cfb02e59d40691e54_200x200.png',
-            gender: 1,
-            is_mute: 0,
-            leader: 2,
-            nickname: 'ssss',
-            remark: '',
-            user_id: 2054,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '荀刚',
-            remark: '',
-            user_id: 3019,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '滕霭',
-            remark: '',
-            user_id: 3045,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '陆宇',
-            remark: '',
-            user_id: 3063,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '颜希',
-            remark: '',
-            user_id: 4031,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '戚青',
-            remark: '',
-            user_id: 4042,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '廖彬',
-            remark: '',
-            user_id: 4101,
-          },
-          {
-            avatar:
-              'https://im.gzydong.com/public/media/image/talk/20230527/4a1ec2956101ba8151cfa7074263ba17_500x500.png',
-            gender: 0,
-            is_mute: 0,
-            leader: 0,
-            nickname: '柯烟',
-            remark: '',
-            user_id: 4107,
-          },
-        ],
-      },
-    };
+  async findMembers(
+    @Query() query: { group_id: string },
+    @Request() req: any,
+  ): Promise<any> {
+    console.debug('findMembers', query);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    console.debug('ServePublishMessage db', db);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+
+    // 连接到MQTT服务器
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      password: '',
+      username: '',
+    });
+    const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
+    const sublishTopic = `thing/chatbot/${db.hash}/response/d2c`;
+    const publishPayloadRaw: any = RoomsService.formatMsgToWechaty(
+      query.group_id,
+    );
+    // 加密
+    // console.debug('ServePublishMessage db.hash', db.hash);
+    const key = getKeyByBasicString(db.hash);
+    const publishPayload = encrypt(publishPayloadRaw, key);
+
+    return new Promise<any>((resolve) => {
+      // 设置15秒超时
+      const timeout: any = setTimeout(() => {
+        const responsePayload = {
+          status: 408,
+          body: { error: 'Request timed out' },
+        };
+        client.end();
+        resolve(responsePayload);
+      }, 10000);
+
+      client.on('connect', () => {
+        client.subscribe(sublishTopic, (err: any) => {
+          if (err) {
+            const responsePayload = {
+              status: 500,
+              body: { error: 'Failed to subscribe to topic' },
+            };
+            client.end();
+            resolve(responsePayload);
+            return;
+          }
+
+          client.publish(publishTopic, publishPayload, (err: any) => {
+            if (err) {
+              const responsePayload = {
+                status: 500,
+                body: { error: 'Failed to publish to topic' },
+              };
+              client.end();
+              resolve(responsePayload);
+            }
+          });
+        });
+      });
+
+      client.on('message', (topic: any, message: { toString: () => any }) => {
+        if (topic === sublishTopic) {
+          try {
+            console.debug('ServePublishMessage message', message.toString());
+            let messageText = message.toString();
+            // console.debug('ServePublishMessage messageText', messageText);
+            // 解密
+            const key = getKeyByBasicString(db.hash);
+            messageText = decrypt(messageText, key);
+
+            const messagePayload = JSON.parse(messageText);
+            console.debug('ServePublishMessage messagePayload', messagePayload);
+            console.debug('messagePayload.reqId', messagePayload.reqId);
+            console.debug(
+              'publishPayload.reqId',
+              JSON.parse(publishPayloadRaw).reqId,
+            );
+            if (messagePayload.reqId === JSON.parse(publishPayloadRaw).reqId) {
+              clearTimeout(timeout);
+              const responsePayload = {
+                code: 200,
+                message: 'success',
+                data: {
+                  items: messagePayload.params.data,
+                },
+              };
+              client.end();
+              resolve(responsePayload);
+            }
+          } catch (e) {
+            console.error(e);
+            const responsePayload = {
+              status: 500,
+              body: { error: e.message },
+            };
+            client.end();
+            resolve(responsePayload);
+          }
+        }
+      });
+
+      client.on('error', (err: { message: any }) => {
+        const responsePayload = {
+          status: 500,
+          body: { error: err.message },
+        };
+        client.end();
+        resolve(responsePayload);
+      });
+    });
+    // return { code: 200, message: 'success' }
   }
 
   @Get('member/invites')
