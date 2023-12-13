@@ -11,6 +11,11 @@ import { ChatsService } from './chats.service.js';
 import { Store } from '../../db/store.js';
 import mqtt from 'mqtt';
 import { v4 } from 'uuid';
+import {
+  getKeyByBasicString,
+  encrypt,
+  decrypt,
+} from '../../utils/crypto-use-crypto-js.js';
 
 @Controller('api/v1/talk')
 export class ChatsController {
@@ -604,6 +609,7 @@ export class ChatsController {
     // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
+    console.debug('ServePublishMessage db', db);
     if (!db) {
       throw new UnauthorizedException();
     }
@@ -649,7 +655,11 @@ export class ChatsController {
       username: '',
     });
     const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
-    const publishPayload: any = ChatsService.formatMsgToWechaty(body);
+    let publishPayload: any = ChatsService.formatMsgToWechaty(body);
+    // 加密
+    console.debug('ServePublishMessage db.hash', db.hash);
+    const key = getKeyByBasicString(db.hash);
+    publishPayload = encrypt(publishPayload, key);
 
     return new Promise<any>((resolve) => {
       // 设置15秒超时
@@ -689,7 +699,11 @@ export class ChatsController {
 
       client.on('message', (topic: any, message: { toString: () => any }) => {
         if (topic === publishTopic) {
-          const messageText = message.toString();
+          let messageText = message.toString();
+          // 解密
+          const key = getKeyByBasicString(db.hash);
+          messageText = decrypt(messageText, key);
+
           const messagePayload = JSON.parse(messageText);
 
           if (messagePayload.reqId === JSON.parse(publishPayload).reqId) {
@@ -761,7 +775,9 @@ export class ChatsController {
     };
 
     publishPayload = JSON.stringify(publishPayload);
-
+    // 加密
+    const key = getKeyByBasicString(db.hash);
+    publishPayload = encrypt(publishPayload, key);
     return new Promise<any>((resolve) => {
       // 设置15秒超时
       const timeout: any = setTimeout(() => {
@@ -800,9 +816,11 @@ export class ChatsController {
 
       client.on('message', (topic: any, message: { toString: () => any }) => {
         if (topic === publishTopic) {
-          const messageText = message.toString();
+          let messageText = message.toString();
+          // 解密
+          const key = getKeyByBasicString(db.hash);
+          messageText = decrypt(messageText, key);
           const messagePayload = JSON.parse(messageText);
-
           if (messagePayload.reqId === JSON.parse(publishPayload).reqId) {
             clearTimeout(timeout);
             const responsePayload = { code: 200, message: 'success' };
