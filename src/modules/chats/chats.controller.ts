@@ -670,7 +670,7 @@ export class ChatsController {
         };
         client.end();
         resolve(responsePayload);
-      }, 5000);
+      }, 15000);
 
       client.on('connect', () => {
         client.subscribe(publishTopic, (err: any) => {
@@ -787,7 +787,7 @@ export class ChatsController {
         };
         client.end();
         resolve(responsePayload);
-      }, 5000);
+      }, 15000);
 
       client.on('connect', () => {
         client.subscribe(publishTopic, (err: any) => {

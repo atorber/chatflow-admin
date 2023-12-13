@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
+import { v4 } from 'uuid';
 
 @Injectable()
 export class RoomsService extends BaseEntity {
@@ -39,5 +40,18 @@ export class RoomsService extends BaseEntity {
   static override setMappingOptions(options: MappingOptions) {
     // 设置映射选项的方法
     this.mappingOptions = options; // 更新当前类的映射选项
+  }
+  static formatMsgToWechaty(roomid: string) {
+    const msg = {
+      reqId: v4(),
+      method: 'thing.command.invoke',
+      version: '1.0',
+      timestamp: new Date().getTime(),
+      name: 'memberAllGet',
+      params: {
+        roomid: roomid,
+      },
+    };
+    return JSON.stringify(msg);
   }
 }
