@@ -28,10 +28,16 @@ jobs:  # workflow中的job
         with:
           images: atorber/chatflow-admin
 
+      - name: Extract package version
+        id: package_version
+        run: echo "::set-output name=VERSION::$(jq -r '.version' package.json)"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2 # docker build & push
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            atorber/chatflow-admin:${{ steps.package_version.outputs.VERSION }}
+            atorber/chatflow-admin:latest
           labels: ${{ steps.meta.outputs.labels }}
