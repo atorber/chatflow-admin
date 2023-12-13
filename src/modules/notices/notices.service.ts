@@ -7,6 +7,10 @@ export class NoticesService extends BaseEntity {
 
   id?: string;
 
+  name?: string;
+
+  type?: string;
+
   alias?: string;
 
   time?: number;
@@ -27,6 +31,9 @@ export class NoticesService extends BaseEntity {
     // 定义字段映射选项
     fieldMapping: {
       // 字段映射
+      id: '好友ID/群ID(选填)|id', // 将 id 映射到 '好友ID/群ID(选填)' 字段
+      name: '昵称/群名称|name',
+      type: '通知目标类型|type',
       desc: '内容|desc',
       alias: '好友备注(选填)|alias',
       time: '时间|time',

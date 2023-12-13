@@ -657,7 +657,7 @@ export class ChatsController {
     const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
     let publishPayload: any = ChatsService.formatMsgToWechaty(body);
     // 加密
-    console.debug('ServePublishMessage db.hash', db.hash);
+    // console.debug('ServePublishMessage db.hash', db.hash);
     const key = getKeyByBasicString(db.hash);
     publishPayload = encrypt(publishPayload, key);
 
