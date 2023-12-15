@@ -119,7 +119,7 @@ export class RoomsController {
       };
     }
 
-    console.debug('group', group);
+    console.debug('group info', JSON.stringify(group));
     return group;
   }
 
@@ -161,7 +161,7 @@ export class RoomsController {
     // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
-    console.debug('ServePublishMessage db', db);
+    console.debug('ServePublishMessage db', db?.userId);
     if (!db) {
       throw new UnauthorizedException();
     }
@@ -184,13 +184,14 @@ export class RoomsController {
     return new Promise<any>((resolve) => {
       // 设置15秒超时
       const timeout: any = setTimeout(() => {
+        console.debug('ServePublishMessage timeout...');
         const responsePayload = {
           status: 408,
           body: { error: 'Request timed out' },
         };
         client.end();
         resolve(responsePayload);
-      }, 10000);
+      }, 120000);
 
       client.on('connect', () => {
         client.subscribe(sublishTopic, (err: any) => {
@@ -228,7 +229,10 @@ export class RoomsController {
             messageText = decrypt(messageText, key);
 
             const messagePayload = JSON.parse(messageText);
-            console.debug('ServePublishMessage messagePayload', messagePayload);
+            console.debug(
+              'ServePublishMessage messagePayload',
+              JSON.stringify(messagePayload),
+            );
             console.debug('messagePayload.reqId', messagePayload.reqId);
             console.debug(
               'publishPayload.reqId',
@@ -247,7 +251,7 @@ export class RoomsController {
               resolve(responsePayload);
             }
           } catch (e) {
-            console.error(e);
+            console.error('ServePublishMessage error', e);
             const responsePayload = {
               status: 500,
               body: { error: e.message },

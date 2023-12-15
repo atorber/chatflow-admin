@@ -283,7 +283,9 @@ export class ChatsController {
         const dispayname = alias || name;
         const talk_type = roomid !== '--' ? 2 : 1;
         let msg_type = 1;
-        let extra = {};
+        let extra: any = {
+          content: messagePayload || '',
+        };
         const receiver_id = roomid !== '--' ? roomid : listenerid;
 
         // if (file) {
@@ -299,16 +301,18 @@ export class ChatsController {
         // }
 
         if (['Image', 'Attachment', 'Video', 'Audio'].includes(messageType)) {
+          extra = {
+            height: 1000,
+            name: '无效文件',
+            size: 0,
+            suffix: '',
+            url: '',
+            width: 563,
+          };
           try {
             const textObj = JSON.parse(messagePayload);
-            extra = {
-              height: 1000,
-              name: textObj.name,
-              size: 0,
-              suffix: '',
-              url: textObj.url,
-              width: 563,
-            };
+            extra.name = textObj.name;
+            extra.url = textObj.url;
           } catch (e) {
             console.debug('解析消息内容失败', e);
           }
@@ -373,7 +377,10 @@ export class ChatsController {
             break;
         }
 
-        if (dispayname) {
+        if (
+          dispayname &&
+          !['Recalled', 'RedEnvelope', 'Unknown'].includes(messageType)
+        ) {
           const id = new Date(timeHms).getTime();
           return {
             id: id,
@@ -390,7 +397,6 @@ export class ChatsController {
             is_revoke: 0,
             is_mark: 0,
             is_read: 0,
-            content: messagePayload || '',
             created_at: timeHms,
             extra: extra,
             recordId: recordId,
@@ -609,7 +615,7 @@ export class ChatsController {
     // console.debug(user);
     // console.debug(Store.users);
     const db = Store.findUser(user.userId);
-    console.debug('ServePublishMessage db', db);
+    console.debug('ServePublishMessage db', db?.userId);
     if (!db) {
       throw new UnauthorizedException();
     }
@@ -655,7 +661,8 @@ export class ChatsController {
       username: '',
     });
     const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
-    let publishPayload: any = ChatsService.formatMsgToWechaty(body);
+    const publishPayloadRaw: any = ChatsService.formatMsgToWechaty(body);
+    let publishPayload: any = publishPayloadRaw;
     // 加密
     // console.debug('ServePublishMessage db.hash', db.hash);
     const key = getKeyByBasicString(db.hash);
@@ -670,7 +677,7 @@ export class ChatsController {
         };
         client.end();
         resolve(responsePayload);
-      }, 15000);
+      }, 120000);
 
       client.on('connect', () => {
         client.subscribe(publishTopic, (err: any) => {
@@ -692,6 +699,14 @@ export class ChatsController {
               };
               client.end();
               resolve(responsePayload);
+            } else {
+              console.debug('ServePublishMessage publish success');
+              // const responsePayload = {
+              //   status: 200,
+              //   body: { message: 'success' },
+              // };
+              // client.end();
+              // resolve(responsePayload);
             }
           });
         });
@@ -705,8 +720,16 @@ export class ChatsController {
           messageText = decrypt(messageText, key);
 
           const messagePayload = JSON.parse(messageText);
-
-          if (messagePayload.reqId === JSON.parse(publishPayload).reqId) {
+          // console.debug(
+          //   'ServePublishMessage messagePayload',
+          //   JSON.stringify(messagePayload),
+          // );
+          console.debug('messagePayload.reqId', messagePayload.reqId);
+          console.debug(
+            'publishPayload.reqId',
+            JSON.parse(publishPayloadRaw).reqId,
+          );
+          if (messagePayload.reqId === JSON.parse(publishPayloadRaw).reqId) {
             clearTimeout(timeout);
             const responsePayload = { code: 200, message: 'success' };
             client.end();
