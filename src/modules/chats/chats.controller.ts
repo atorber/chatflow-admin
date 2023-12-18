@@ -249,7 +249,9 @@ export class ChatsController {
     // }
     let res: any = [];
 
-    if (data.talk_type === '2') {
+    if (!data.talk_type) {
+      res = await ChatsService.findByQuery('', data.limit);
+    } else if (data.talk_type === '2') {
       res = await ChatsService.findByField(
         'roomid',
         data.receiver_id,
