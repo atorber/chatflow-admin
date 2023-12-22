@@ -38,6 +38,9 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { ChatbotsService } from './modules/chatbots/chatbots.service';
 import { ChatbotsController } from './modules/chatbots/chatbots.controller';
 import { ChatbotsModule } from './modules/chatbots/chatbots.module';
+import { CopilotService } from './modules/copilot/copilot.service';
+import { CopilotController } from './modules/copilot/copilot.controller';
+import { CopilotModule } from './modules/copilot/copilot.module';
 
 @Module({
   imports: [
@@ -56,6 +59,7 @@ import { ChatbotsModule } from './modules/chatbots/chatbots.module';
     StatisticsModule,
     OrdersModule,
     ChatbotsModule,
+    CopilotModule,
   ],
   controllers: [
     AppController,
@@ -71,6 +75,7 @@ import { ChatbotsModule } from './modules/chatbots/chatbots.module';
     StatisticsController,
     OrdersController,
     ChatbotsController,
+    CopilotController,
   ],
   providers: [
     AppService,
@@ -84,6 +89,7 @@ import { ChatbotsModule } from './modules/chatbots/chatbots.module';
     StatisticsService,
     OrdersService,
     ChatbotsService,
+    CopilotService,
   ],
 })
 export class AppModule {}

@@ -73,6 +73,9 @@ export class VikaDB {
     region?: string;
     endpoint?: string;
     bucketName?: string;
+    CHATGPT_KEY?: string;
+    CHATGPT_ENDPOINT?: string;
+    CHATGPT_MODEL?: string;
   };
 
   constructor(config?: VikaConfig) {
