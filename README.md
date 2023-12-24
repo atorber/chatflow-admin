@@ -1,4 +1,4 @@
-# ChatAdmin
+# ChatFlowAdmin
 
 <img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow-admin"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow-admin"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow-admin">
 
