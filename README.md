@@ -6,7 +6,9 @@
 
 ChatAdmin是ChatStudio的后端API项目。基于nest开发，ChatFlow项目UI的后端。
 
-[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/chatflow)
+配套前端项目 Chat Studio [https://github.com/atorber/chat-studio](https://github.com/atorber/chat-studio) 
+
+访问[项目语雀文档](https://www.yuque.com/atorber/chatflow)了解更多信息
 
 ## 功能模块
 
