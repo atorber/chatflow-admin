@@ -84,6 +84,13 @@ const vikaFields = {
         type: 'Attachment',
         editable: true,
       },
+      {
+        id: 'fldsQQJOJHIkX2',
+        name: '分组名称|groupName',
+        type: 'SingleText',
+        property: { defaultValue: '' },
+        editable: true,
+      },
     ],
   },
   message: 'SUCCESS',

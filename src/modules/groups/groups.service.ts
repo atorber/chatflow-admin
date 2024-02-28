@@ -2,28 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
 
 @Injectable()
-export class ContactsService extends BaseEntity {
-  name?: string; // 定义名字属性，可选
-
-  id?: string;
-
-  alias?: string;
-
-  gender?: string;
-
-  updated?: string;
-
-  friend?: string;
-
-  type?: string;
-
-  avatar?: string;
-
-  phone?: string;
-
-  file?: string;
-
-  groupName?: string;
+export class GroupsService extends BaseEntity {
+  groupName: string; // 定义名字属性，可选
+  name: string;
+  id: string;
+  alias: string;
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
 
@@ -31,19 +14,12 @@ export class ContactsService extends BaseEntity {
     // 定义字段映射选项
     fieldMapping: {
       // 字段映射
+      groupName: '分组名称|groupName',
+      name: '好友昵称|name',
       alias: '备注名称|alias',
       id: '好友ID|id',
-      name: '好友昵称|name',
-      gender: '性别|gender',
-      updated: '更新时间|updated',
-      friend: '是否好友|friend',
-      type: '类型|type',
-      avatar: '头像|avatar',
-      phone: '手机号|phone',
-      file: '头像图片|file',
-      groupName: '分组名称|groupName',
     },
-    tableName: '好友列表|Contact', // 表名
+    tableName: '分组|Group', // 表名
   };
 
   protected static override getMappingOptions(): MappingOptions {

@@ -244,7 +244,7 @@ export abstract class BaseEntity {
       // console.info(records)
       return null;
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
+    console.error('findById获取数据记录失败：', JSON.stringify(response));
     throw response;
   }
 
@@ -254,7 +254,7 @@ export abstract class BaseEntity {
   static async findByField(
     fieldName: string,
     value: any,
-    pageSize: number | undefined = 100,
+    pageSize: string | undefined = '100',
   ): Promise<IRecord[] | undefined[]> {
     const field = this.mappingOptions.fieldMapping[fieldName];
     let records: IRecord[] = [];
@@ -268,14 +268,25 @@ export abstract class BaseEntity {
     };
     console.info('query:', JSON.stringify(query));
     // 分页获取记录，默认返回第一页
-    const response = await this.datasheet.records.query(query);
-    if (response.success) {
-      records = response.data.records;
-      // console.info(records)
-      return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
+    try {
+      const response = await this.datasheet.records.query(query);
+      console.info('findByField response:', response);
+      if (response.success) {
+        try {
+          records = response.data.records;
+          // console.info(records)
+          return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
+        } catch (err) {
+          console.error('转换数据记录失败：', JSON.stringify(err));
+          return err;
+        }
+      }
+      console.error('获取数据记录成功：', JSON.stringify(response));
+      return response;
+    } catch (err) {
+      console.error('findByField获取数据记录失败：', err);
+      return err;
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
-    return response;
   }
 
   /**
@@ -287,7 +298,7 @@ export abstract class BaseEntity {
   ): Promise<IRecord[] | undefined[]> {
     const query = {
       filterByFormula,
-      pageSize: pageSize,
+      pageSize,
     };
     console.info('query:', JSON.stringify(query));
     // 分页获取记录，默认返回第一页
@@ -297,7 +308,7 @@ export abstract class BaseEntity {
       // console.info(records)
       return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
+    console.error('findByQuery获取数据记录失败：', response);
     return response;
   }
 

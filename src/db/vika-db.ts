@@ -25,6 +25,7 @@ export interface DateBase {
   qaSheet: string;
   chatBotSheet: string;
   chatBotUserSheet: string;
+  groupSheet: string;
 }
 
 export class KeyDisplaynameMap {
@@ -104,6 +105,7 @@ export class VikaDB {
       qaSheet: '',
       chatBotSheet: '',
       chatBotUserSheet: '',
+      groupSheet: '',
     };
     this.dataBaseNames = { ...this.dataBaseIds };
     this.config = {};
@@ -326,7 +328,7 @@ export class VikaDB {
       records = response.data.records;
       // console.info(records)
     } else {
-      console.error('获取数据记录失败：', JSON.stringify(response));
+      console.error('getRecords获取数据记录失败：', JSON.stringify(response));
       records = response;
     }
     return records;

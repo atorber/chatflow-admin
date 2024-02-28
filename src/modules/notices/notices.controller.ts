@@ -91,18 +91,18 @@ export class NoticesController {
     const resDel = await NoticesService.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
-    let res: any = '';
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
     if (resDel.success) {
       res = {
         code: 200,
         message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     }
     return res;

@@ -75,10 +75,24 @@ export class RoomsController {
   }
 
   @Get('detail')
-  async findOne(@Query() query: { group_id: string }): Promise<string> {
+  async findOne(
+    @Request() req: any,
+    @Query() query: { group_id: string },
+  ): Promise<string> {
     console.debug('findOne', query);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    RoomsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.roomSheet, // 设置 base ID
+    });
     const id = query.group_id;
-    console.debug('id', id);
     let group: any = {
       code: 200,
       message: 'success',
@@ -95,7 +109,7 @@ export class RoomsController {
         visit_card: '',
       },
     };
-    const res: any[] = await RoomsService.findByField('id', id);
+    const res: any[] = await RoomsService.findByField('id', id, '1');
     let item = {};
     if (res.length > 0) {
       const groupInfo = res[0].fields;
@@ -115,7 +129,8 @@ export class RoomsController {
     } else {
       group = {
         code: 305,
-        message: `strconv.ParseInt: parsing "${id}": value out of range`,
+        message: 'fail',
+        data: res,
       };
     }
 

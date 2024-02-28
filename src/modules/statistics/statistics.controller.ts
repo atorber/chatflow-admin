@@ -26,23 +26,25 @@ export class StatisticsController {
       baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
     });
     const data = await StatisticsService.findAll();
-    const items = data.map((value: any) => {
-      const fields = value.fields;
-      fields.recordId = value.recordId;
-      return fields;
-    });
-    // console.debug(data);
     const res: any = {
-      code: 200,
-      message: 'success',
-      data: {
+      code: 400,
+      message: 'error',
+      data,
+    };
+    if (data.length) {
+      const items = data.map((value: any) => {
+        const fields = value.fields;
+        fields.recordId = value.recordId;
+        return fields;
+      });
+      res.data = {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.length,
         list: items,
-      },
-    };
+      };
+    }
     return res;
   }
   @Post('create')
@@ -61,7 +63,7 @@ export class StatisticsController {
     });
     const resCreate: any = await StatisticsService.create(body);
     console.debug('resCreate', resCreate);
-    const res: any = { code: 400, message: 'fail', data: {} };
+    const res: any = { code: 400, message: 'fail', data: { data: resCreate } };
     if (resCreate.recordId) {
       res.code = 200;
       res.message = 'success';
@@ -91,18 +93,18 @@ export class StatisticsController {
     const resDel = await StatisticsService.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
-    let res: any = '';
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: resDel,
+    };
     if (resDel.success) {
       res = {
         code: 200,
         message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     }
     return res;

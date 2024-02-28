@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Store } from '../../db/store.js';
 import { UsersService } from './users.service.js';
+import { delay } from '../../utils/utils.js';
 
 @Controller('/api/v1/users')
 export class UsersController {
@@ -72,8 +73,8 @@ export class UsersController {
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
-    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
-    // console.debug('ServeLoginVika:', res);
+    const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    console.debug('ServeLoginVika:', res);
 
     const userInfo: any = {
       code: 200,
@@ -96,6 +97,7 @@ export class UsersController {
           nickname: db.nickname,
           uid: db.id,
           hash: db.hash,
+          recordId: res[0]?.recordId,
         },
       },
     };
@@ -210,9 +212,51 @@ export class UsersController {
     if (res.success) {
       data.code = 200;
       data.message = 'success';
-      data.data = res;
+      data.data = res.data;
     }
 
+    return data;
+  }
+
+  // 批量更新配置信息
+  @Post('config/bykey')
+  async updateConfig(@Request() req: any, @Body() body: any) {
+    console.debug('setConfig body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    UsersService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    await delay(500);
+    const res = await UsersService.findByField('key', body.key);
+    console.debug('wait update config:', res);
+    const recordId = res[0]?.recordId as string;
+    const fields = res[0]?.fields as any;
+    fields.value = body.value;
+    await delay(500);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+    try {
+      const resUpdate = await UsersService.update(recordId, fields);
+      console.debug('update config:', resUpdate);
+      if (resUpdate.updatedAt) {
+        data.code = 200;
+        data.message = 'success';
+        data.data = resUpdate;
+      }
+    } catch (e) {
+      console.error('update config error:', e);
+    }
     return data;
   }
 }

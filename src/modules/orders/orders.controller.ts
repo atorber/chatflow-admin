@@ -96,7 +96,9 @@ export class OrdersController {
       res = {
         code: 200,
         message: 'success',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     } else {
       res = {

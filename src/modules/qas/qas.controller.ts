@@ -32,23 +32,25 @@ export class QasController {
     } else {
       data = await QasService.findAll();
     }
-    const items = data.map((value: any) => {
-      const fields = value.fields;
-      fields.recordId = value.recordId;
-      return fields;
-    });
-    // console.debug(data);
     const res: any = {
-      code: 200,
-      message: 'success',
-      data: {
+      code: 400,
+      message: 'error',
+      data,
+    };
+    if (data.length) {
+      const items = data.map((value: any) => {
+        const fields = value.fields;
+        fields.recordId = value.recordId;
+        return fields;
+      });
+      res.data = {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.length,
         list: items,
-      },
-    };
+      };
+    }
     return res;
   }
   @Post('create')
@@ -69,6 +71,7 @@ export class QasController {
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
       const resCreate: any = await QasService.create(body);
+      res.data = resCreate;
       console.debug('resCreate', resCreate);
       if (resCreate.recordId) {
         res.code = 200;
@@ -77,6 +80,8 @@ export class QasController {
       }
     } catch (e) {
       console.error(e);
+      res.message = 'error';
+      res.data = e;
     }
     return res;
   }
@@ -118,18 +123,16 @@ export class QasController {
     const resDel = await QasService.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
-    let res: any = '';
+    const res: any = {
+      code: 400,
+      message: 'error',
+      data: resDel,
+    };
     if (resDel.success) {
-      res = {
-        code: 200,
-        message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+      res.code = 200;
+      res.message = 'success';
+      res.data = {
+        recordId: body.recordId,
       };
     }
     return res;

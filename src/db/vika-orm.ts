@@ -199,9 +199,12 @@ export abstract class BaseEntity {
       const res = await this.datasheet.records.update(datas);
       if (!res.success) {
         console.error('记录更新维格表失败：', res);
+      } else {
+        console.debug('updatEmultiple success res:', res);
       }
-      const record: IRecord = res.data.records[0];
-      return this.createFromRecord(record) as IRecord;
+      return res;
+      // const record: IRecord = res.data.records[0];
+      // return this.createFromRecord(record) as IRecord;
     } catch (err) {
       console.error('请求维格表更新失败：', err);
       return err;
@@ -244,7 +247,7 @@ export abstract class BaseEntity {
       // console.info(records)
       return null;
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
+    console.error('findById获取数据记录失败：', JSON.stringify(response));
     throw response;
   }
 
@@ -274,7 +277,7 @@ export abstract class BaseEntity {
       // console.info(records)
       return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
+    console.error('findByField获取数据记录失败：', JSON.stringify(response));
     return response;
   }
 
@@ -297,7 +300,7 @@ export abstract class BaseEntity {
       // console.info(records)
       return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
+    console.error('findByQuery获取数据记录失败：', JSON.stringify(response));
     return response;
   }
 
