@@ -13,6 +13,8 @@ import { UploadService } from './upload.service';
 import { S3 } from 'aws-sdk';
 import { Store } from '../../db/store.js';
 // import { v4 } from 'uuid';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 
 @Controller('api/v1/upload')
 export class UploadController {
@@ -68,6 +70,34 @@ export class UploadController {
         },
       };
     }
+  }
+
+  @Post('imageVika')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImageVika(
+    @Request() req: any,
+    @UploadedFile() file: any,
+    @Body() body: any,
+  ) {
+    console.info('上传图片文件:', file);
+    console.info('其他表单数据:', body);
+
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+
+    // 构建保存文件的路径
+    const savePath = join(__dirname, '../upload', file.originalname);
+    console.info('文件保存路径:', savePath);
+    // 使用fs模块将文件保存到磁盘
+    await writeFile(savePath, file.buffer);
+
+    // 响应
+    return { message: '文件上传成功', filename: file.originalname };
   }
 
   // 计算分片上传的MD5值

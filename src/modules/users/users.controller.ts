@@ -136,7 +136,7 @@ export class UsersController {
       data,
     };
 
-    console.debug('resInfo:', JSON.stringify(resInfo));
+    // console.debug('config resInfo:', JSON.stringify(resInfo));
     return resInfo;
   }
 
@@ -182,7 +182,7 @@ export class UsersController {
       data,
     };
 
-    console.debug('userInfo:', JSON.stringify(resInfo));
+    // console.debug('config/group resInfo:', JSON.stringify(resInfo));
     return resInfo;
   }
 

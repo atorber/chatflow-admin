@@ -25,13 +25,14 @@ export class StatisticsController {
       apiKey: db.token,
       baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
     });
-    const data = await StatisticsService.findAll();
-    const res: any = {
-      code: 400,
-      message: 'error',
-      data,
-    };
-    if (data.length) {
+    try {
+      const data = await StatisticsService.findAll();
+      console.debug('Statistics data', data);
+      const res: any = {
+        code: 200,
+        message: 'success',
+        data,
+      };
       const items = data.map((value: any) => {
         const fields = value.fields;
         fields.recordId = value.recordId;
@@ -44,8 +45,16 @@ export class StatisticsController {
         itemCount: data.length,
         list: items,
       };
+      return res;
+    } catch (e) {
+      console.error(e);
+      const res: any = {
+        code: 400,
+        message: 'error',
+        data: e,
+      };
+      return res;
     }
-    return res;
   }
   @Post('create')
   async create(@Body() body: any, @Request() req: any): Promise<string> {

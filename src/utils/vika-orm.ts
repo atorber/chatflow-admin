@@ -1,5 +1,6 @@
 /* eslint-disable guard-for-in */
 import { Vika, ICreateRecordsReqParams } from '@vikadata/vika';
+import * as fs from 'node:fs';
 
 interface IField {
   [key: string]: string | '';
@@ -45,6 +46,8 @@ export abstract class BaseEntity {
 
   recordId: string = '';
 
+  static datasheet: any;
+
   /**
    * 设置 Vika API 选项
    */
@@ -57,8 +60,6 @@ export abstract class BaseEntity {
   protected static getRecordId(): string {
     throw new Error('Must be implemented by subclass');
   }
-
-  static datasheet: any;
 
   /**
    * 设置 Vika API 选项
@@ -144,8 +145,10 @@ export abstract class BaseEntity {
     const recordsNew: ICreateRecordsReqParams = entity.map((r: any) => ({
       fields: this.formatData(r),
     }));
+    // console.info('recordsNew:', JSON.stringify(recordsNew, null, 2));
     try {
       const res = await this.datasheet.records.create(recordsNew);
+
       if (res.success) {
         // console.info(res.data.records)
       } else {
@@ -154,7 +157,8 @@ export abstract class BaseEntity {
       const records = res.data.records.map((r: any) =>
         this.createFromRecord(r),
       );
-      return records;
+      res.data = records;
+      return res;
     } catch (err) {
       console.error('请求维格表写入失败：', err);
       return err;
@@ -348,5 +352,24 @@ export abstract class BaseEntity {
     }
 
     return this;
+  }
+
+  static async upload(path: string) {
+    console.info('文件本地路径：', path);
+    try {
+      if (fs.existsSync(path)) {
+        // 文件存在，可以继续你的操作
+        const file = fs.createReadStream(path);
+        const resp = await this.datasheet.upload(file);
+        return resp;
+      } else {
+        console.error('文件不存在');
+        // 文件不存在，你需要处理这个问题
+        return '文件不存在';
+      }
+    } catch (error) {
+      console.error('上传文件失败：', error);
+      return error;
+    }
   }
 }

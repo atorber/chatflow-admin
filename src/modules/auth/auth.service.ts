@@ -28,6 +28,16 @@ export class AuthService {
     };
   }
 
+  async init(username: string, pass: string) {
+    const db = new VikaDB();
+    const res = await db.createSheet({
+      token: pass,
+      spaceId: username,
+    });
+    delay(500);
+    return res;
+  }
+
   async signIn(username: string, pass: string) {
     let user = await this.usersService.findOne(username);
     // console.debug('ServeLoginVika:', user);

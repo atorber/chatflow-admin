@@ -5,8 +5,11 @@ import {
   UnauthorizedException,
   Query,
   Body,
+  UseInterceptors,
+  UploadedFile,
   Post,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ChatsService } from './chats.service.js';
 import { Store } from '../../db/store.js';
 import mqtt from 'mqtt';
@@ -16,6 +19,8 @@ import {
   encrypt,
   decrypt,
 } from '../../utils/crypto-use-crypto-js.js';
+import * as fs from 'fs/promises';
+import { join } from 'path';
 
 @Controller('api/v1/talk')
 export class ChatsController {
@@ -410,6 +415,61 @@ export class ChatsController {
     records.data.items = items;
     console.debug('records', records.data.items.length);
     return records;
+  }
+  // 批量更新配置信息
+  @Post('records')
+  async create(@Request() req: any, @Body() body: any) {
+    // console.debug('create records body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    console.debug('create records db:', db?.userId || undefined);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    ChatsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
+    });
+    const res = await ChatsService.createBatch(body.records);
+    // console.debug('create records res:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+
+    if (res.success) {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+    return data;
+  }
+
+  @Post('imageVika')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImageVika(@Request() req: any, @UploadedFile() file: any) {
+    // console.info('上传图片文件:', file);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // 构建保存文件的路径
+    const savePath = join(__dirname, '../upload', file.originalname);
+    console.info('文件保存路径:', savePath);
+    // 使用fs模块将文件保存到磁盘
+    await fs.writeFile(savePath, file.buffer);
+    const resUpload = await ChatsService.upload(savePath);
+    // 删除临时文件
+    await fs.unlink(savePath);
+    // 响应
+    return resUpload;
   }
 
   @Get('records/history')

@@ -107,4 +107,35 @@ export class GroupnoticesController {
     }
     return res;
   }
+  // 批量更新配置信息
+  @Post('update')
+  async update(@Request() req: any, @Body() body: any) {
+    console.debug('setConfig body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    GroupnoticesService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
+    });
+    const res = await GroupnoticesService.updatEmultiple(body);
+    console.debug('update config:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+    if (res.success) {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+
+    return data;
+  }
 }

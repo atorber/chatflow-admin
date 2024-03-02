@@ -72,7 +72,113 @@ export class ContactsController {
     contacts.data.items = items;
     return contacts;
   }
+  @Post('delete')
+  async delete(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('qa delete', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    ContactsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
+    });
 
+    const resDel = await ContactsService.delete(body.recordId);
+    console.debug('qa resDel', resDel);
+
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
+    if (resDel.success) {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {
+          recordId: body.recordId,
+        },
+      };
+    }
+    return res;
+  }
+  @Post('deleteBatch')
+  async deleteBatch(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('qa delete', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    ContactsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
+    });
+
+    const resDel = await ContactsService.deleteBatch(body.recordIds);
+    console.debug('qa resDel', resDel);
+
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
+    if (resDel.success) {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {
+          recordId: body.recordId,
+        },
+      };
+    }
+    return res;
+  }
+  // 批量更新配置信息
+  @Post('update')
+  async update(@Request() req: any, @Body() body: any) {
+    console.debug('setConfig body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    ContactsService.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
+    });
+    const res = await ContactsService.updatEmultiple(body);
+    console.debug('update config:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+    if (res.success) {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+
+    return data;
+  }
   @Get('detail')
   async findDetail(
     @Request() req: any,
@@ -141,7 +247,6 @@ export class ContactsController {
     console.debug('contact', contact);
     return contact;
   }
-
   // 更新好友所属分组
   @Post('move-group')
   moveGroup(@Body() body: { apply_id: string; remark: string }): any {
