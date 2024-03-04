@@ -29,16 +29,12 @@ export class ChatsController {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
-    });
-    const res = await ChatsService.findAll();
+    const res = await userCur.db.message.findAll();
     // console.debug(res);
     const talks: any = {
       code: 200,
@@ -95,7 +91,7 @@ export class ChatsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         const {
           roomid,
@@ -154,7 +150,7 @@ export class ChatsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     // 过滤items对象数组中receiver_id相同的对象,只保留最新的一条
     const filteredItems = items.reduce((acc: any, curr: any) => {
@@ -184,17 +180,13 @@ export class ChatsController {
     const user = req.user;
     console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
-    });
 
-    data.record_id = db.id;
+    data.record_id = userCur.id;
     const records = {
       code: 200,
       message: 'success',
@@ -255,15 +247,15 @@ export class ChatsController {
     let res: any = [];
 
     if (!data.talk_type) {
-      res = await ChatsService.findByQuery('', data.limit);
+      res = await userCur.db.message.findByQuery('', data.limit);
     } else if (data.talk_type === '2') {
-      res = await ChatsService.findByField(
+      res = await userCur.db.message.findByField(
         'roomid',
         data.receiver_id,
         data.limit,
       );
     } else {
-      res = await ChatsService.findByQuery(
+      res = await userCur.db.message.findByQuery(
         `({接收人ID|listenerid}="${data.receiver_id}"&&{好友ID|wxid}="${data.record_id}")||({接收人ID|listenerid}="${data.record_id}"&&{好友ID|wxid}="${data.receiver_id}")`,
         data.limit,
       );
@@ -419,29 +411,25 @@ export class ChatsController {
   // 批量更新配置信息
   @Post('records')
   async create(@Request() req: any, @Body() body: any) {
-    // console.debug('create records body:', body);
+    // console.debug('create records body:', JSON.stringify(body));
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    console.debug('create records db:', db?.userId || undefined);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    // console.debug('create records db userCur:', userCur?.userId || undefined);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
-    });
-    const res = await ChatsService.createBatch(body.records);
+    const res = await userCur.db.message.createBatch(body.records);
     // console.debug('create records res:', res);
     const data: any = {
       code: 400,
       message: 'fail',
-      data: {},
+      data: res,
     };
 
-    if (res.success) {
+    if (res.message === 'success') {
       data.code = 200;
       data.message = 'success';
       data.data = res.data;
@@ -456,8 +444,8 @@ export class ChatsController {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // 构建保存文件的路径
@@ -465,11 +453,12 @@ export class ChatsController {
     console.info('文件保存路径:', savePath);
     // 使用fs模块将文件保存到磁盘
     await fs.writeFile(savePath, file.buffer);
-    const resUpload = await ChatsService.upload(savePath);
+    const resUpload = await userCur.db.message.upload(savePath);
+    console.debug('ServeUploadImageVika resUpload', resUpload);
     // 删除临时文件
     await fs.unlink(savePath);
     // 响应
-    return resUpload;
+    return { data: resUpload.data };
   }
 
   @Get('records/history')
@@ -936,21 +925,17 @@ export class ChatsController {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.messageSheet, // 设置 base ID
-    });
 
-    const resDel = await ChatsService.delete(body.recordId);
+    const resDel = await userCur.db.message.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = '';
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',

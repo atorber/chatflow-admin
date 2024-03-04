@@ -5,7 +5,7 @@ import type {
   // Field,
 } from '../Model';
 
-import { replaceSyncStatus, actionState } from '../actionBar';
+import { replaceSyncStatus, actionState } from '../actionBar.js';
 
 const name = '智聊用户|ChatbotUser';
 const code = 'chatBotUserSheet';
@@ -47,6 +47,13 @@ const vikaFields = {
         editable: true,
       },
       {
+        id: 'fldmYtMgA15iI',
+        name: '好友备注(选填)|alias',
+        type: 'SingleText',
+        property: {},
+        editable: true,
+      },
+      {
         id: 'fld4P2sX0CHco',
         name: '用户提示词|prompt',
         type: 'Text',
@@ -59,6 +66,12 @@ const vikaFields = {
         property: {
           precision: 0,
         },
+        editable: true,
+      },
+      {
+        id: 'fldsG69W4KzJa',
+        name: '备注|info',
+        type: 'Text',
         editable: true,
       },
       {
@@ -87,12 +100,6 @@ const vikaFields = {
         },
         editable: true,
       },
-      {
-        id: 'fldsG69W4KzJa',
-        name: '备注|info',
-        type: 'Text',
-        editable: true,
-      },
     ],
   },
   message: 'SUCCESS',
@@ -107,8 +114,27 @@ if (actionState[code]) {
 const defaultRecords: any = {
   code: 200,
   success: true,
-  data: { total: 0, records: [], pageNum: 1, pageSize: 0 },
-  message: 'SUCCESS',
+  message: 'Request successful',
+  data: {
+    total: 1,
+    pageNum: 1,
+    pageSize: 1,
+    records: [
+      {
+        recordId: 'rec55WfnpHQpM',
+        fields: {
+          '机器人ID|id': '4',
+          '昵称|botname': '小G',
+          '用户ID|wxid': 'zhangsan',
+          '用户名称|name': '张三',
+          '好友备注(选填)|alias': '张三',
+          '配额|quota': 100,
+          '备注|info': '示例配置数据',
+          '启用状态|state': '启用',
+        },
+      },
+    ],
+  },
 };
 
 export const sheet: Sheet = {

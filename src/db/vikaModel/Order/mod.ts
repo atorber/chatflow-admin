@@ -77,11 +77,32 @@ const vikaFields = {
   },
   message: 'SUCCESS',
 };
+
 const defaultRecords = {
   code: 200,
   success: true,
-  data: { total: 0, records: [], pageNum: 1, pageSize: 0 },
-  message: 'SUCCESS',
+  message: 'Request successful',
+  data: {
+    total: 1,
+    pageNum: 1,
+    pageSize: 1,
+    records: [
+      {
+        recordId: 'rechd25gDKrw7',
+        fields: {
+          '编号|serialNumber': '123',
+          '活动编号|code': '4',
+          '活动描述|desc': '示例活动',
+          '昵称|name': '大师',
+          '备注名称(选填)|alias': 'chatflow作者',
+          '好友ID(选填)|wxid': 'ledongmao',
+          '群名称|topic': '瓦力是群主',
+          '创建时间|createdAt': '1702522321914',
+          '备注|info': '示例订单信息',
+        },
+      },
+    ],
+  },
 };
 
 export const orderSheet: Sheet = {

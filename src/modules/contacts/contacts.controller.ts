@@ -7,7 +7,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ContactsService } from './contacts.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/contact')
@@ -22,11 +21,7 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.contactSheet, // 设置 base ID
-    });
-    const res = await ContactsService.findAll();
+    const res = await db.db.contact.findAll();
     // console.debug(res);
     const contacts: any = {
       code: 200,
@@ -48,7 +43,7 @@ export class ContactsController {
       },
     };
 
-    const items = res
+    const items: any[] = res.data
       .map((value: any) => {
         if (value.fields.name) {
           return {
@@ -64,10 +59,11 @@ export class ContactsController {
             remark: value.fields.alias,
             recordId: value.recordId,
           };
+        } else {
+          return false;
         }
-        return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     contacts.data.items = items;
     return contacts;
@@ -86,12 +82,8 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
 
-    const resDel = await ContactsService.delete(body.recordId);
+    const resDel = await db.db.contact.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = {
@@ -99,7 +91,7 @@ export class ContactsController {
       message: 'error',
       data: {},
     };
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
@@ -124,12 +116,8 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
 
-    const resDel = await ContactsService.deleteBatch(body.recordIds);
+    const resDel = await db.db.contact.deleteBatch(body.recordIds);
     console.debug('qa resDel', resDel);
 
     let res: any = {
@@ -137,7 +125,7 @@ export class ContactsController {
       message: 'error',
       data: {},
     };
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
@@ -151,7 +139,7 @@ export class ContactsController {
   // 批量更新配置信息
   @Post('update')
   async update(@Request() req: any, @Body() body: any) {
-    console.debug('setConfig body:', body);
+    console.debug('api/v1/contact/update body:', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -160,18 +148,14 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
-    const res = await ContactsService.updatEmultiple(body);
+    const res = await db.db.contact.updatEmultiple(body);
     console.debug('update config:', res);
     const data: any = {
       code: 400,
       message: 'fail',
       data: {},
     };
-    if (res.success) {
+    if (res.message === 'success') {
       data.code = 200;
       data.message = 'success';
       data.data = res.data;
@@ -194,10 +178,7 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.contactSheet, // 设置 base ID
-    });
+
     let contact: any = {
       code: 200,
       message: 'success',
@@ -213,10 +194,10 @@ export class ContactsController {
         remark: 'test5',
       },
     };
-    const res = await ContactsService.findByField('id', id);
+    const res = await db.db.contact.findByField('id', id);
     let item = {};
-    if (res.length > 0) {
-      const value: any = res[0];
+    if (res.data.length > 0) {
+      const value: any = res.data[0];
       console.debug('value', JSON.stringify(value));
       item = {
         avatar:
@@ -339,11 +320,7 @@ export class ContactsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ContactsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.contactSheet, // 设置 base ID
-    });
-    const res = await ContactsService.findAll();
+    const res = await db.db.contact.findAll();
     // console.debug(res);
     let contacts: any = {
       code: 200,
@@ -365,7 +342,7 @@ export class ContactsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         if (value.fields.name) {
           return {
@@ -384,7 +361,7 @@ export class ContactsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     contacts.data.items = items;
     contacts = {

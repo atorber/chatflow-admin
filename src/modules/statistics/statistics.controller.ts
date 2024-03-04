@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { StatisticsService } from './statistics.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/statistic')
@@ -21,19 +20,15 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
     try {
-      const data = await StatisticsService.findAll();
+      const data = await db.db.statistic.findAll();
       console.debug('Statistics data', data);
       const res: any = {
         code: 200,
         message: 'success',
         data,
       };
-      const items = data.map((value: any) => {
+      const items = data.data.map((value: any) => {
         const fields = value.fields;
         fields.recordId = value.recordId;
         return fields;
@@ -42,7 +37,7 @@ export class StatisticsController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
+        itemCount: data.data.length,
         list: items,
       };
       return res;
@@ -66,14 +61,11 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
-    const resCreate: any = await StatisticsService.create(body);
+
+    const resCreate = await db.db.statistic.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: { data: resCreate } };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -94,12 +86,8 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
 
-    const resDel = await StatisticsService.delete(body.recordId);
+    const resDel = await db.db.statistic.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = {
@@ -107,7 +95,7 @@ export class StatisticsController {
       message: 'error',
       data: resDel,
     };
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',

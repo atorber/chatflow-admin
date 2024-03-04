@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { GroupnoticesService } from './groupnotices.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/groupnotice')
@@ -21,12 +20,9 @@ export class GroupnoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupnoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
-    const data = await GroupnoticesService.findAll();
-    const items = data.map((value: any) => {
+
+    const data = await db.db.groupNotice.findAll();
+    const items = data.data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
       return fields;
@@ -39,7 +35,7 @@ export class GroupnoticesController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
+        itemCount: data.data.length,
         list: items,
       },
     };
@@ -55,14 +51,10 @@ export class GroupnoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupnoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
-    const resCreate: any = await GroupnoticesService.create(body);
+    const resCreate = await db.db.groupNotice.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -83,12 +75,7 @@ export class GroupnoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupnoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
-
-    const resDel = await GroupnoticesService.delete(body.recordId);
+    const resDel = await db.db.groupNotice.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = {
@@ -96,7 +83,7 @@ export class GroupnoticesController {
       message: 'error',
       data: {},
     };
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
@@ -110,7 +97,7 @@ export class GroupnoticesController {
   // 批量更新配置信息
   @Post('update')
   async update(@Request() req: any, @Body() body: any) {
-    console.debug('setConfig body:', body);
+    console.debug('group/update body:', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -119,18 +106,14 @@ export class GroupnoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupnoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
-    });
-    const res = await GroupnoticesService.updatEmultiple(body);
+    const res = await db.db.groupNotice.updatEmultiple(body);
     console.debug('update config:', res);
     const data: any = {
       code: 400,
       message: 'fail',
       data: {},
     };
-    if (res.success) {
+    if (res.message === 'success') {
       data.code = 200;
       data.message = 'success';
       data.data = res.data;

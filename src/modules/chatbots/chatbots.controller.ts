@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ChatbotsService, ChatbotUserService } from './chatbots.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/chatbot')
@@ -16,16 +15,14 @@ export class ChatbotsController {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
-    console.debug(db);
-    ChatbotsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotSheet, // 设置 base ID
-    });
-    const data = await ChatbotsService.findAll();
+    console.debug(userCur);
+
+    const chatBotRes = await userCur.db.chatBot.findAll();
+    const data = chatBotRes.data as any;
     const items = data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
@@ -56,14 +53,10 @@ export class ChatbotsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatbotsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotSheet, // 设置 base ID
-    });
-    const resCreate: any = await ChatbotsService.create(body);
+    const resCreate = await db.db.chatBot.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -85,20 +78,16 @@ export class ChatbotsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatbotsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotSheet, // 设置 base ID
-    });
 
-    const resDel = await ChatbotsService.delete(body.recordId);
+    const resDel = await db.db.chatBot.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = '';
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
-        data: {},
+        data: resDel.data,
       };
     } else {
       res = {
@@ -120,11 +109,9 @@ export class ChatbotsController {
       throw new UnauthorizedException();
     }
     console.debug(db);
-    ChatbotUserService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotUserSheet, // 设置 base ID
-    });
-    const data = await ChatbotUserService.findAll();
+
+    const chatBotUser = await db.db.chatBotUser.findAll();
+    const data = chatBotUser.data;
     const items = data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
@@ -155,14 +142,11 @@ export class ChatbotsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatbotUserService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotUserSheet, // 设置 base ID
-    });
-    const resCreate: any = await ChatbotUserService.create(body);
+
+    const resCreate = await db.db.chatBotUser.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -179,25 +163,21 @@ export class ChatbotsController {
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
+    const userCur = Store.findUser(user.userId);
+    if (!userCur) {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    ChatbotUserService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.chatBotUserSheet, // 设置 base ID
-    });
 
-    const resDel = await ChatbotUserService.delete(body.recordId);
+    const resDel = await userCur.db.chatBotUser.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = '';
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
-        data: {},
+        data: resDel.data,
       };
     } else {
       res = {

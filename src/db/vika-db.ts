@@ -4,6 +4,20 @@ import type { Sheets } from './vikaModel/Model.js';
 import { sheets } from './vikaModel/index';
 import { delay } from '../utils/utils';
 import { SHA256 } from 'crypto-js';
+import { Messages } from './vikaModel/Message/db.js';
+import { Env } from './vikaModel/Env/db.js';
+import { Chatbots } from './vikaModel/ChatBot/db.js';
+import { ChatbotUsers } from './vikaModel/ChatBotUser/db.js';
+import { Contacts } from './vikaModel/Contact/db.js';
+import { Groupnotices } from './vikaModel/GroupNotice/db.js';
+import { Groups } from './vikaModel/Group/db.js';
+import { Keywords } from './vikaModel/Keyword/db.js';
+import { Notices } from './vikaModel/Notice/db.js';
+import { Orders } from './vikaModel/Order/db.js';
+import { Qas } from './vikaModel/Qa/db.js';
+import { Rooms } from './vikaModel/Room/db.js';
+import { Statistics } from './vikaModel/Statistic/db.js';
+import { Whitelists } from './vikaModel/WhiteList/db.js';
 
 type Field = {
   id?: string;
@@ -15,7 +29,7 @@ type Field = {
   isPrimary?: boolean;
 };
 
-export type VikaConfig = {
+export type BiTableConfig = {
   spaceId: string;
   token: string;
 };
@@ -63,7 +77,7 @@ export class KeyDisplaynameMap {
   }
 }
 
-export class VikaDB {
+export class BiTable {
   spaceName: string;
   username: string;
   nickname: string;
@@ -88,12 +102,27 @@ export class VikaDB {
     CHATGPT_ENDPOINT?: string;
     CHATGPT_MODEL?: string;
   };
-
-  constructor(config?: VikaConfig) {
+  db: {
+    env: Env;
+    message: Messages;
+    chatBot: Chatbots;
+    chatBotUser: ChatbotUsers;
+    contact: Contacts;
+    groupNotice: Groupnotices;
+    group: Groups;
+    keyword: Keywords;
+    notice: Notices;
+    order: Orders;
+    qa: Qas;
+    room: Rooms;
+    statistic: Statistics;
+    whiteList: Whitelists;
+  };
+  constructor(config?: BiTableConfig) {
     if (config) this.init(config);
   }
 
-  async init(config: VikaConfig) {
+  async init(config: BiTableConfig) {
     console.info('初始化检查系统表...');
     this.spaceId = config.spaceId;
     this.userId = this.spaceId;
@@ -158,16 +187,16 @@ export class VikaDB {
         console.info(
           '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
         );
-        return { success: false, code: 400, data: '' };
+        return { message: 'success', code: 200, data: '' };
       }
     } catch (error) {
       console.error('获取空间ID失败：', error);
-      return { success: false, code: 400, data: '' };
+      return { message: 'fail', code: 400, data: '' };
     }
     // console.info('空间ID:', this.spaceId)
   }
 
-  async createSheet(config: VikaConfig) {
+  async createSheet(config: BiTableConfig) {
     this.spaceId = config.spaceId;
     this.vika = new Vika({ token: config.token });
     this.token = config.token;
@@ -328,9 +357,11 @@ export class VikaDB {
           }
         }
         console.debug('初始化表完成...');
-        return { message: 'success' };
+        const data = JSON.parse(JSON.stringify(this));
+        delete data.vika;
+        return { message: 'success', code: 200, data: JSON.stringify(data) };
       } else {
-        return { message: '初始化失败，检查配置信息是否有误！！！' };
+        return { message: 'fail', code: 400, data: '' };
       }
     } catch (error) {
       return error;

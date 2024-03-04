@@ -7,7 +7,6 @@ import {
   Body,
   UnauthorizedException,
 } from '@nestjs/common';
-import { GroupsService } from './groups.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/contact/group')
@@ -26,15 +25,11 @@ export class GroupsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.groupSheet, // 设置 base ID
-    });
     let data: any = [];
     if (query.fieldName && query.value) {
-      data = await GroupsService.findByField(query.fieldName, query.value);
+      data = await db.db.group.findByField(query.fieldName, query.value);
     } else {
-      data = await GroupsService.findAll();
+      data = await db.db.group.findAll();
     }
     const res: any = {
       code: 400,
@@ -91,16 +86,12 @@ export class GroupsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    GroupsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
-    });
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
-      const resCreate: any = await GroupsService.create(body);
+      const resCreate = await db.db.group.create(body);
       res.data = resCreate;
       console.debug('resCreate', resCreate);
-      if (resCreate.recordId) {
+      if (resCreate.data.recordId) {
         res.code = 200;
         res.message = 'success';
       }

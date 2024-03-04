@@ -5,7 +5,7 @@ import type {
   // Field,
 } from '../Model';
 
-import { replaceSyncStatus, actionState } from '../actionBar';
+import { replaceSyncStatus, actionState } from '../actionBar.js';
 
 const name = '好友列表|Contact';
 const code = 'contactSheet';
@@ -82,13 +82,6 @@ const vikaFields = {
         id: 'fldYxqREKJ3Or',
         name: '头像图片|file',
         type: 'Attachment',
-        editable: true,
-      },
-      {
-        id: 'fldsQQJOJHIkX2',
-        name: '分组名称|groupName',
-        type: 'SingleText',
-        property: { defaultValue: '' },
         editable: true,
       },
     ],

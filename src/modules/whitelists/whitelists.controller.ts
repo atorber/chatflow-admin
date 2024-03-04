@@ -7,7 +7,6 @@ import {
   Body,
   UnauthorizedException,
 } from '@nestjs/common';
-import { WhitelistsService } from './whitelists.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/whitelist')
@@ -26,23 +25,20 @@ export class WhitelistsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    WhitelistsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
-    });
-    let data: any = [];
+    let data;
     if (query.fieldName && query.value) {
-      data = await WhitelistsService.findByField(query.fieldName, query.value);
+      data = await db.db.whiteList.findByField(query.fieldName, query.value);
     } else {
-      data = await WhitelistsService.findAll();
+      data = await db.db.whiteList.findAll();
     }
     const res: any = {
       code: 400,
       message: 'error',
-      data,
+      data: data.data,
     };
-    if (data.length) {
-      const items = data.map((value: any) => {
+
+    if (data.data.length) {
+      const items = data.data.map((value: any) => {
         const fields = value.fields;
         fields.recordId = value.recordId;
         return fields;
@@ -53,7 +49,7 @@ export class WhitelistsController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
+        itemCount: data.data.length,
         list: items,
       };
     }
@@ -70,16 +66,13 @@ export class WhitelistsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    WhitelistsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
-    });
+
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
-      const resCreate: any = await WhitelistsService.create(body);
+      const resCreate = await db.db.whiteList.create(body);
       res.data = resCreate;
       console.debug('resCreate', resCreate);
-      if (resCreate.recordId) {
+      if (resCreate.data.recordId) {
         res.code = 200;
         res.message = 'success';
       }
@@ -103,12 +96,8 @@ export class WhitelistsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    WhitelistsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
-    });
 
-    const resDel = await WhitelistsService.delete(body.recordId);
+    const resDel = await db.db.whiteList.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
     let res: any = {
@@ -116,7 +105,7 @@ export class WhitelistsController {
       message: 'error',
       data: resDel,
     };
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
@@ -137,19 +126,16 @@ export class WhitelistsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    WhitelistsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
-    });
-    const data = await WhitelistsService.findAll();
+
+    const data = await db.db.whiteList.findAll();
     // console.debug(data);
     const res: any = {
       code: 400,
       message: 'error',
       data,
     };
-    if (data.length) {
-      const items = data.map((value: any) => {
+    if (data.data.length) {
+      const items = data.data.map((value: any) => {
         const fields = value.fields;
         fields.recordId = value.recordId;
         return fields;
@@ -160,7 +146,7 @@ export class WhitelistsController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
+        itemCount: data.data.length,
         list: items,
       };
     }
