@@ -35,7 +35,7 @@ export class KeywordsController {
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.data.length,
-        list: items,
+        items: items,
       },
     };
     return res;
@@ -67,7 +67,7 @@ export class KeywordsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('keyword delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -78,7 +78,7 @@ export class KeywordsController {
     // console.debug(db);
 
     const resDel = await db.db.keyword.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('keyword resDel', resDel);
 
     let res: any = '';
     if (resDel.message === 'success') {

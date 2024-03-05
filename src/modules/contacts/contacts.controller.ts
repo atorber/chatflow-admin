@@ -68,12 +68,75 @@ export class ContactsController {
     contacts.data.items = items;
     return contacts;
   }
+  @Get('list/raw')
+  async findAllRaw(@Request() req: any): Promise<string> {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const res = await db.db.contact.findAll();
+    // console.debug(res);
+    const contacts: any = {
+      code: 200,
+      message: 'success',
+      data: {
+        items: [],
+      },
+    };
+
+    const items: any[] = res.data
+      .map((value: any) => {
+        const fields = value.fields;
+        if (fields) {
+          fields.recordId = value.recordId;
+          return fields;
+        } else {
+          return false;
+        }
+      })
+      .filter((item: any) => item !== false);
+
+    contacts.data.items = items;
+    return contacts;
+  }
+  // 批量更新配置信息
+  @Post('create/batch')
+  async createBatch(@Request() req: any, @Body() body: any) {
+    // console.debug('create records body:', JSON.stringify(body));
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const userCur = Store.findUser(user.userId);
+    // console.debug('create records db userCur:', userCur?.userId || undefined);
+    if (!userCur) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const res = await userCur.db.contact.createBatch(body);
+    // console.debug('create records res:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: res,
+    };
+
+    if (res.message === 'success') {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+    return data;
+  }
   @Post('delete')
   async delete(@Body() body: any, @Request() req: any): Promise<string> {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('contact delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -84,7 +147,7 @@ export class ContactsController {
     // console.debug(db);
 
     const resDel = await db.db.contact.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('contact resDel', resDel);
 
     let res: any = {
       code: 400,
@@ -107,7 +170,7 @@ export class ContactsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('contact deleteBatch', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -118,7 +181,7 @@ export class ContactsController {
     // console.debug(db);
 
     const resDel = await db.db.contact.deleteBatch(body.recordIds);
-    console.debug('qa resDel', resDel);
+    console.debug('contact resDel', resDel);
 
     let res: any = {
       code: 400,

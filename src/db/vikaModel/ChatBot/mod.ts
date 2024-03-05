@@ -59,7 +59,7 @@ const vikaFields = {
             },
             {
               id: 'optOyZnLw4AZJ',
-              name: 'ss',
+              name: '扣子',
               color: {
                 name: 'blue_0',
                 value: '#DDF5FF',

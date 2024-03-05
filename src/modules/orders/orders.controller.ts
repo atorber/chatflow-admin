@@ -35,7 +35,7 @@ export class OrdersController {
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.data.length,
-        list: items,
+        items: items,
       },
     };
     return res;
@@ -66,7 +66,7 @@ export class OrdersController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('order delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -77,7 +77,7 @@ export class OrdersController {
     // console.debug(db);
 
     const resDel = await db.db.order.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('order resDel', resDel);
 
     let res: any = '';
     if (resDel.message === 'success') {

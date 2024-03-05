@@ -22,7 +22,7 @@ export class StatisticsController {
     // console.debug(db);
     try {
       const data = await db.db.statistic.findAll();
-      console.debug('Statistics data', data);
+      // console.debug('Statistics data', data);
       const res: any = {
         code: 200,
         message: 'success',
@@ -38,7 +38,7 @@ export class StatisticsController {
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.data.length,
-        list: items,
+        items: items,
       };
       return res;
     } catch (e) {
@@ -77,7 +77,7 @@ export class StatisticsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('statistic delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -88,7 +88,7 @@ export class StatisticsController {
     // console.debug(db);
 
     const resDel = await db.db.statistic.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('statistic resDel', resDel);
 
     let res: any = {
       code: 400,

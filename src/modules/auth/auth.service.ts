@@ -87,14 +87,14 @@ export class AuthService {
         apiKey: db.token,
         baseId: db.dataBaseIds.chatBotSheet, // 设置 base ID
       });
-      userCur.db.chatbot = chatbot;
+      userCur.db.chatBot = chatbot;
 
       const chatbotUser = new ChatbotUsers();
       chatbotUser.setVikaOptions({
         apiKey: db.token,
         baseId: db.dataBaseIds.chatBotUserSheet, // 设置 base ID
       });
-      userCur.db.chatbotUser = chatbotUser;
+      userCur.db.chatBotUser = chatbotUser;
 
       const contact = new Contacts();
       contact.setVikaOptions({
@@ -168,7 +168,7 @@ export class AuthService {
 
       // 获取配置信息
       const resEnv = await env.findAll();
-      console.debug('ServeLoginVika:', resEnv.data.length);
+      // console.debug('ServeLoginVika:', resEnv.data.length);
 
       const config: any = {};
       resEnv.data.map((item: any) => {

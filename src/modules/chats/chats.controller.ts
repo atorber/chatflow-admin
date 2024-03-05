@@ -411,7 +411,7 @@ export class ChatsController {
   // 批量更新配置信息
   @Post('records')
   async create(@Request() req: any, @Body() body: any) {
-    // console.debug('create records body:', JSON.stringify(body));
+    console.debug('create records body:', JSON.stringify(body));
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -422,7 +422,8 @@ export class ChatsController {
     }
     // console.debug(db);
     const res = await userCur.db.message.createBatch(body.records);
-    // console.debug('create records res:', res);
+    // console.debug('create records res:', JSON.stringify(res, null, 2));
+
     const data: any = {
       code: 400,
       message: 'fail',
@@ -921,7 +922,7 @@ export class ChatsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('chatbots delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -932,7 +933,7 @@ export class ChatsController {
     // console.debug(db);
 
     const resDel = await userCur.db.message.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('chatbots resDel', JSON.stringify(resDel));
 
     let res: any = '';
     if (resDel.message === 'success') {

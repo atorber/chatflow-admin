@@ -43,7 +43,7 @@ export class QasController {
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.data.length,
-        list: items,
+        items: items,
       };
     }
     return res;

@@ -142,6 +142,56 @@ export class UsersController {
     return resInfo;
   }
 
+  @Get('config/keys')
+  async getConfigKeys(@Request() req: any) {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const userCur = new Env();
+    userCur.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
+
+    const res = await userCur.findAll();
+    const data = res.data.map((item: any) => {
+      const field = item.fields;
+      field.id = item.recordId;
+      return field;
+    });
+
+    const vikaData: any = {};
+    const configRecords = data;
+
+    for (let i = 0; i < configRecords.length; i++) {
+      const fields: any = configRecords[i];
+
+      if (fields['key']) {
+        if (fields['value'] && ['false', 'true'].includes(fields['value'])) {
+          vikaData[fields['key'] as string] = fields['value'] === 'true';
+        } else {
+          vikaData[fields['key'] as string] = fields['value'] || '';
+        }
+      }
+    }
+
+    const resInfo: any = {
+      code: 200,
+      message: 'success',
+      data: vikaData,
+    };
+
+    // console.debug('config resInfo:', JSON.stringify(resInfo));
+    return resInfo;
+  }
+
   @Get('config/group')
   async getConfigGroup(@Request() req: any) {
     const user = req.user;

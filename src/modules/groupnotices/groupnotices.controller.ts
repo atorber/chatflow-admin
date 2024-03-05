@@ -36,7 +36,7 @@ export class GroupnoticesController {
         pageSize: 1000,
         pageCount: 1,
         itemCount: data.data.length,
-        list: items,
+        items: items,
       },
     };
     return res;
@@ -66,7 +66,7 @@ export class GroupnoticesController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('groupnotice delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -76,7 +76,7 @@ export class GroupnoticesController {
     }
     // console.debug(db);
     const resDel = await db.db.groupNotice.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    console.debug('groupnotice resDel', resDel);
 
     let res: any = {
       code: 400,
