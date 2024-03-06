@@ -1,8 +1,14 @@
 /* eslint-disable guard-for-in */
 import { Vika, ICreateRecordsReqParams } from '@vikadata/vika';
+import * as fs from 'node:fs';
 
 interface IField {
   [key: string]: string | '';
+}
+
+interface OrmResponse {
+  message: 'success' | 'fail';
+  data: any;
 }
 
 export interface IRecord {
@@ -36,14 +42,16 @@ export abstract class BaseEntity {
   /**
    * Vika API 选项
    */
-  protected static vikaOptions: VikaOptions | undefined;
+  protected vikaOptions: VikaOptions | undefined;
 
   /**
    * 映射选项
    */
-  protected static mappingOptions: MappingOptions;
+  protected mappingOptions: MappingOptions;
 
   recordId: string = '';
+
+  datasheet: any;
 
   /**
    * 设置 Vika API 选项
@@ -54,17 +62,15 @@ export abstract class BaseEntity {
     return this.recordId;
   }
 
-  protected static getRecordId(): string {
+  protected getRecordId(): string {
     throw new Error('Must be implemented by subclass');
   }
-
-  static datasheet: any;
 
   /**
    * 设置 Vika API 选项
    */
 
-  static setVikaOptions(options: VikaOptions) {
+  setVikaOptions(options: VikaOptions) {
     // console.info('setVikaOptions:', options)
     if (!options.apiKey || !options.baseId) {
       throw Error('loss apiKey or baseId');
@@ -78,18 +84,18 @@ export abstract class BaseEntity {
   /**
    * 设置映射选项
    */
-  static setMappingOptions(options: MappingOptions) {
+  setMappingOptions(options: MappingOptions) {
     this.mappingOptions = options;
   }
 
-  protected static getMappingOptions(): MappingOptions {
+  protected getMappingOptions(): MappingOptions {
     throw new Error('Must be implemented by subclass');
   }
 
   /**
    * 格式化数据
    */
-  static formatData(data: Record<string, any>) {
+  formatData(data: Record<string, any>) {
     const formatted: Record<string, any> = {};
     const mappingOptions = this.getMappingOptions();
     // console.info('this.mappingOptions', mappingOptions)
@@ -106,7 +112,7 @@ export abstract class BaseEntity {
   /**
    * 从记录创建实体
    */
-  protected static createFromRecord(record: any) {
+  protected createFromRecord(record: any) {
     const data: any = record.fields;
     const entity: any = {};
     const mappingOptions = this.getMappingOptions();
@@ -122,7 +128,7 @@ export abstract class BaseEntity {
   /**
    * 创建记录
    */
-  static async create<T extends BaseEntity>(entity: Partial<T>) {
+  async create<T extends BaseEntity>(entity: Partial<T>): Promise<OrmResponse> {
     const recordFormat = this.formatData(entity);
     // console.info('recordFormat', JSON.stringify(recordFormat))
     const records: ICreateRecordsReqParams = [{ fields: recordFormat }];
@@ -130,20 +136,29 @@ export abstract class BaseEntity {
       const res = await this.datasheet.records.create(records);
       // console.info('record res:', JSON.stringify(res))
       const record = res.data.records[0];
-      return this.createFromRecord(record) as T;
+      return {
+        message: 'success',
+        data: this.createFromRecord(record) as T,
+      };
     } catch (err) {
-      throw Error('create fail');
+      // throw Error('create fail');
+      console.error('create fail:', err);
+      return {
+        message: 'fail',
+        data: err,
+      };
     }
   }
 
   /**
    * 批量创建记录
    */
-  static async createBatch<T extends BaseEntity>(entity: Partial<T>[]) {
+  async createBatch(entity: IRecord[]): Promise<OrmResponse> {
     // console.info('写入维格表:', records.length)
     const recordsNew: ICreateRecordsReqParams = entity.map((r: any) => ({
       fields: this.formatData(r),
     }));
+    console.info('recordsNew:', JSON.stringify(recordsNew));
     try {
       const res = await this.datasheet.records.create(recordsNew);
       if (res.success) {
@@ -154,17 +169,23 @@ export abstract class BaseEntity {
       const records = res.data.records.map((r: any) =>
         this.createFromRecord(r),
       );
-      return records;
+      return {
+        message: 'success',
+        data: records,
+      };
     } catch (err) {
       console.error('请求维格表写入失败：', err);
-      return err;
+      return {
+        message: 'fail',
+        data: err,
+      };
     }
   }
 
   /**
    * 更新记录
    */
-  static async update<T extends BaseEntity>(id: string, entity: Partial<T>) {
+  async update(id: string, entity: IRecord): Promise<OrmResponse> {
     const data = this.formatData(entity);
 
     try {
@@ -175,19 +196,25 @@ export abstract class BaseEntity {
         console.error('记录更新维格表失败：', res);
       }
       const record: IRecord = res.data.records[0];
-      return this.createFromRecord(record) as IRecord;
+      return {
+        message: 'success',
+        data: this.createFromRecord(record) as IRecord,
+      };
     } catch (err) {
       console.error('请求维格表更新失败：', err);
-      return err;
+      return {
+        message: 'fail',
+        data: err,
+      };
     }
   }
 
   /**
    * 批量更新记录
    */
-  static async updatEmultiple<T extends BaseEntity>(
+  async updatEmultiple<T extends BaseEntity>(
     records: { recordId: string; fields: Partial<T> }[],
-  ) {
+  ): Promise<OrmResponse> {
     const datas = records.map((item) => {
       return {
         fields: this.formatData(item.fields),
@@ -199,63 +226,82 @@ export abstract class BaseEntity {
       const res = await this.datasheet.records.update(datas);
       if (!res.success) {
         console.error('记录更新维格表失败：', res);
+      } else {
+        console.debug('updatEmultiple success res:', res);
       }
-      const record: IRecord = res.data.records[0];
-      return this.createFromRecord(record) as IRecord;
+      return {
+        message: 'success',
+        data: res,
+      };
+      // const record: IRecord = res.data.records[0];
+      // return this.createFromRecord(record) as IRecord;
     } catch (err) {
       console.error('请求维格表更新失败：', err);
-      return err;
+      return {
+        message: 'fail',
+        data: err,
+      };
     }
   }
 
   /**
    * 删除记录
    */
-  static async delete(id: string) {
+  async delete(id: string): Promise<OrmResponse> {
     const response = await this.datasheet.records.delete([id]);
     if (!response.success) {
       console.error('删除记录失败：', response);
     }
-    return response;
+    return {
+      message: response.success ? 'success' : 'fail',
+      data: response,
+    };
   }
 
   /**
    * 批量删除记录
    */
-  static async deleteBatch(ids: string[]) {
+  async deleteBatch(ids: string[]): Promise<OrmResponse> {
     const response = await this.datasheet.records.delete(ids);
     if (!response.success) {
       console.error('删除记录失败：', response);
     }
-    return response;
+    return {
+      message: response.success ? 'success' : 'fail',
+      data: response,
+    };
   }
 
   /**
    * 根据 ID 查找单个记录
    */
-  static async findById(id: string): Promise<IRecord | null> {
+  async findById(id: string): Promise<OrmResponse> {
     let records: IRecord[] = [];
     const query = { recordIds: id };
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query);
     if (response.success) {
       records = response.data.records;
-      if (records.length) return this.createFromRecord(records[0]) as IRecord;
-      // console.info(records)
-      return null;
+      return {
+        message: 'success',
+        data: this.createFromRecord(records[0]) as IRecord,
+      };
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
-    throw response;
+    console.error('findById获取数据记录失败：', JSON.stringify(response));
+    return {
+      message: 'fail',
+      data: response,
+    };
   }
 
   /**
    * 根据字段查询多条记录
    */
-  static async findByField(
+  async findByField(
     fieldName: string,
     value: any,
     pageSize: number | undefined = 100,
-  ): Promise<IRecord[] | undefined[]> {
+  ): Promise<OrmResponse> {
     const field = this.mappingOptions.fieldMapping[fieldName];
     let records: IRecord[] = [];
     if (!field) {
@@ -272,19 +318,25 @@ export abstract class BaseEntity {
     if (response.success) {
       records = response.data.records;
       // console.info(records)
-      return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
+      return {
+        message: 'success',
+        data: records.map((r: any) => this.createFromRecord(r)) as IRecord[],
+      };
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
-    return response;
+    console.error('findByField获取数据记录失败：', JSON.stringify(response));
+    return {
+      message: 'fail',
+      data: response,
+    };
   }
 
   /**
    * 根据字段查询多条记录
    */
-  static async findByQuery(
+  async findByQuery(
     filterByFormula: string,
     pageSize: number | undefined = 100,
-  ): Promise<IRecord[] | undefined[]> {
+  ): Promise<OrmResponse> {
     const query = {
       filterByFormula,
       pageSize: pageSize,
@@ -295,16 +347,22 @@ export abstract class BaseEntity {
     if (response.success) {
       const { records } = response.data;
       // console.info(records)
-      return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
+      return {
+        message: 'success',
+        data: records.map((r: any) => this.createFromRecord(r)) as IRecord[],
+      };
     }
-    console.error('获取数据记录失败：', JSON.stringify(response));
-    return response;
+    console.error('findByQuery获取数据记录失败：', JSON.stringify(response));
+    return {
+      message: 'fail',
+      data: response,
+    };
   }
 
   /**
    * 查询所有记录
    */
-  static async findAll(): Promise<IRecord[] | unknown[]> {
+  async findAll(): Promise<OrmResponse> {
     const records: IRecord[] = [];
     try {
       // Automatically handle pagination and iterate through all records.
@@ -317,25 +375,44 @@ export abstract class BaseEntity {
       }
 
       // console.info('findAll() records:', records.length)
-      return records.map((r: any) => this.createFromRecord(r)) as IRecord[];
+      return {
+        message: 'success',
+        data: records.map((r: any) => this.createFromRecord(r)) as IRecord[],
+      };
     } catch (error) {
       console.error('Error in findAll():', error);
-      throw error;
+      return {
+        message: 'fail',
+        data: error,
+      };
     }
   }
 
-  /**
-   * 保存实体
-   */
-  async save(): Promise<this> {
-    const Constructor = this.constructor as typeof BaseEntity;
-    if (this.recordId) {
-      await Constructor.update(this.recordId, this);
-    } else {
-      const entity: any = await Constructor.create(this);
-      this.recordId = entity.id;
+  async upload(path: string): Promise<OrmResponse> {
+    console.info('文件本地路径：', path);
+    try {
+      if (fs.existsSync(path)) {
+        // 文件存在，可以继续你的操作
+        const file = fs.createReadStream(path);
+        const resp = await this.datasheet.upload(file);
+        return {
+          message: 'success',
+          data: resp.data,
+        };
+      } else {
+        console.error('文件不存在');
+        // 文件不存在，你需要处理这个问题
+        return {
+          message: 'fail',
+          data: '文件不存在',
+        };
+      }
+    } catch (error) {
+      console.error('上传文件失败：', error);
+      return {
+        message: 'fail',
+        data: error,
+      };
     }
-
-    return this;
   }
 }

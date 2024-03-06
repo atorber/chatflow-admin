@@ -43,3 +43,13 @@ QQ群 : 583830241
 ## 如果你觉得还不错，请 Star , Fork 给作者鼓励一下。
 
 [![Star History Chart](https://api.star-history.com/svg?repos=atorber/chatflow-admin&type=Date)](https://star-history.com/#atorber/chatflow-admin&Date)
+
+## 更新日志
+
+### 3.0.0-6
+
+- 支持chatflow客户端，web端与bot客户端共享后端
+
+### 3.0.0-5
+
+- 适配飞书多维表格，初步测试通过

@@ -4,8 +4,32 @@ import type { Sheets } from './vikaModel/Model.js';
 import { sheets } from './vikaModel/index';
 import { delay } from '../utils/utils';
 import { SHA256 } from 'crypto-js';
+import { Messages } from './vikaModel/Message/db.js';
+import { Env } from './vikaModel/Env/db.js';
+import { Chatbots } from './vikaModel/ChatBot/db.js';
+import { ChatbotUsers } from './vikaModel/ChatBotUser/db.js';
+import { Contacts } from './vikaModel/Contact/db.js';
+import { Groupnotices } from './vikaModel/GroupNotice/db.js';
+import { Groups } from './vikaModel/Group/db.js';
+import { Keywords } from './vikaModel/Keyword/db.js';
+import { Notices } from './vikaModel/Notice/db.js';
+import { Orders } from './vikaModel/Order/db.js';
+import { Qas } from './vikaModel/Qa/db.js';
+import { Rooms } from './vikaModel/Room/db.js';
+import { Statistics } from './vikaModel/Statistic/db.js';
+import { Whitelists } from './vikaModel/WhiteList/db.js';
 
-export type VikaConfig = {
+type Field = {
+  id?: string;
+  name: string;
+  type: string;
+  property?: any;
+  desc?: string;
+  editable?: boolean;
+  isPrimary?: boolean;
+};
+
+export type BiTableConfig = {
   spaceId: string;
   token: string;
 };
@@ -25,6 +49,7 @@ export interface DateBase {
   qaSheet: string;
   chatBotSheet: string;
   chatBotUserSheet: string;
+  groupSheet: string;
 }
 
 export class KeyDisplaynameMap {
@@ -52,7 +77,7 @@ export class KeyDisplaynameMap {
   }
 }
 
-export class VikaDB {
+export class BiTable {
   spaceName: string;
   username: string;
   nickname: string;
@@ -77,11 +102,27 @@ export class VikaDB {
     CHATGPT_ENDPOINT?: string;
     CHATGPT_MODEL?: string;
   };
-
-  constructor(config?: VikaConfig) {
+  db: {
+    env: Env;
+    message: Messages;
+    chatBot: Chatbots;
+    chatBotUser: ChatbotUsers;
+    contact: Contacts;
+    groupNotice: Groupnotices;
+    group: Groups;
+    keyword: Keywords;
+    notice: Notices;
+    order: Orders;
+    qa: Qas;
+    room: Rooms;
+    statistic: Statistics;
+    whiteList: Whitelists;
+  };
+  constructor(config?: BiTableConfig) {
     if (config) this.init(config);
   }
-  async init(config: VikaConfig) {
+
+  async init(config: BiTableConfig) {
     console.info('初始化检查系统表...');
     this.spaceId = config.spaceId;
     this.userId = this.spaceId;
@@ -104,6 +145,7 @@ export class VikaDB {
       qaSheet: '',
       chatBotSheet: '',
       chatBotUserSheet: '',
+      groupSheet: '',
     };
     this.dataBaseNames = { ...this.dataBaseIds };
     this.config = {};
@@ -145,13 +187,185 @@ export class VikaDB {
         console.info(
           '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
         );
-        return { success: false, code: 400, data: '' };
+        return { message: 'success', code: 200, data: '' };
       }
     } catch (error) {
       console.error('获取空间ID失败：', error);
-      return { success: false, code: 400, data: '' };
+      return { message: 'fail', code: 400, data: '' };
     }
     // console.info('空间ID:', this.spaceId)
+  }
+
+  async createSheet(config: BiTableConfig) {
+    this.spaceId = config.spaceId;
+    this.vika = new Vika({ token: config.token });
+    this.token = config.token;
+    this.dataBaseIds = {
+      messageSheet: '',
+      keywordSheet: '',
+      contactSheet: '',
+      roomSheet: '',
+      envSheet: '',
+      whiteListSheet: '',
+      noticeSheet: '',
+      statisticSheet: '',
+      orderSheet: '',
+      stockSheet: '',
+      groupNoticeSheet: '',
+      qaSheet: '',
+      chatBotSheet: '',
+      chatBotUserSheet: '',
+      groupSheet: '',
+    };
+    this.dataBaseNames = { ...this.dataBaseIds };
+
+    try {
+      const tables = await this.getNodesList();
+      console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2));
+      if (tables) {
+        await delay(500);
+
+        for (const k in sheets) {
+          // console.info(this)
+          const sheet = sheets[k as keyof Sheets];
+          // console.info('数据模型：', k, sheet)
+          if (sheet && !tables[sheet.name]) {
+            console.debug(`表不存在，创建表并初始化数据...${k}/${sheet.name}`);
+            const fields = sheet.fields;
+            // console.info('fields:', JSON.stringify(fields))
+            const newFields: Field[] = [];
+            for (let j = 0; j < fields.length; j++) {
+              const field = fields[j];
+              const newField: Field = {
+                type: field?.type || '',
+                name: field?.name || '',
+                desc: field?.desc || '',
+                // property:{},
+              };
+              // console.info('字段定义：', JSON.stringify(field))
+              let options;
+              switch (field?.type) {
+                case 'SingleText':
+                  newField.property = field.property || {};
+                  newFields.push(newField);
+                  break;
+                case 'SingleSelect':
+                  options = field.property.options;
+                  newField.property = {};
+                  newField.property.defaultValue =
+                    field.property.defaultValue || options[0].name;
+                  newField.property.options = [];
+                  for (let z = 0; z < options.length; z++) {
+                    const option = {
+                      name: options[z].name,
+                      // color: options[z].color.name,
+                    };
+                    newField.property.options.push(option);
+                  }
+                  newFields.push(newField);
+                  break;
+                case 'MultiSelect':
+                  options = field.property.options;
+                  newField.property = {};
+                  newField.property.defaultValue =
+                    field.property.defaultValue || options[0].name;
+                  newField.property.options = [];
+                  for (let z = 0; z < options.length; z++) {
+                    const option = {
+                      name: options[z].name,
+                      color: options[z].color.name,
+                    };
+                    newField.property.options.push(option);
+                  }
+                  newFields.push(newField);
+                  break;
+                case 'Text':
+                  newFields.push(newField);
+                  break;
+                case 'Number':
+                  newField.property = {};
+                  newField.property.defaultValue = field.property.defaultValue;
+                  newField.property.precision = field.property.precision;
+                  newFields.push(newField);
+                  break;
+                case 'DateTime':
+                  newField.property = {};
+                  newField.property.dateFormat = 'YYYY-MM-DD';
+                  newField.property.includeTime = true;
+                  newField.property.timeFormat = 'HH:mm';
+                  newField.property.autoFill = true;
+                  newFields.push(newField);
+                  break;
+                case 'Checkbox':
+                  newField.property = {
+                    icon: 'white_check_mark',
+                  };
+                  newFields.push(newField);
+                  break;
+                case 'Attachment':
+                  newFields.push(newField);
+                  break;
+                default:
+                  newFields.push(newField);
+                  break;
+              }
+            }
+
+            console.info('创建表，表信息：', JSON.stringify(newFields));
+
+            const resCreate = await this.createDataSheet(
+              k,
+              sheet.name,
+              newFields,
+            );
+            console.info('创建表结果：', JSON.stringify(resCreate));
+            if (resCreate.createdAt) {
+              await delay(1000);
+              const defaultRecords = sheet.defaultRecords;
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              if (defaultRecords) {
+                // console.info(defaultRecords.length)
+                const count = Math.ceil(defaultRecords.length / 10);
+                for (let i = 0; i < count; i++) {
+                  const records = defaultRecords.splice(0, 10);
+                  console.info('写入：', records.length);
+                  try {
+                    await this.createRecord(
+                      this.dataBaseIds[k as keyof DateBase],
+                      records,
+                    );
+                    await delay(1000);
+                  } catch (error) {
+                    console.error('写入表失败：', error);
+                  }
+                }
+                console.debug(sheet.name + '初始化数据写入完成...');
+              }
+            } else {
+              console.info('创建表失败：', resCreate);
+              throw new Error(
+                `创建表【${sheet.name}】失败,启动中止，需要重新运行...`,
+              );
+            }
+          } else if (sheet) {
+            // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
+            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
+            this.dataBaseNames[sheet.name as keyof DateBase] =
+              tables[sheet.name];
+          } else {
+            /* empty */
+          }
+        }
+        console.debug('初始化表完成...');
+        const data = JSON.parse(JSON.stringify(this));
+        delete data.vika;
+        return { message: 'success', code: 200, data: JSON.stringify(data) };
+      } else {
+        return { message: 'fail', code: 400, data: '' };
+      }
+    } catch (error) {
+      return error;
+    }
   }
 
   async getAllSpaces() {
@@ -326,7 +540,7 @@ export class VikaDB {
       records = response.data.records;
       // console.info(records)
     } else {
-      console.error('获取数据记录失败：', JSON.stringify(response));
+      console.error('getRecords获取数据记录失败：', JSON.stringify(response));
       records = response;
     }
     return records;

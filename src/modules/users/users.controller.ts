@@ -7,7 +7,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Store } from '../../db/store.js';
-import { UsersService } from './users.service.js';
+import { delay } from '../../utils/utils.js';
+import { Env } from '../../db/vikaModel/Env/db.js';
 
 @Controller('/api/v1/users')
 export class UsersController {
@@ -68,12 +69,13 @@ export class UsersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    UsersService.setVikaOptions({
+    const userCur = new Env();
+    userCur.setVikaOptions({
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
-    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
-    // console.debug('ServeLoginVika:', res);
+    const res = await userCur.findByField('key', 'BASE_BOT_ID');
+    console.debug('ServeLoginVika:', res);
 
     const userInfo: any = {
       code: 200,
@@ -96,6 +98,7 @@ export class UsersController {
           nickname: db.nickname,
           uid: db.id,
           hash: db.hash,
+          recordId: res.data[0]?.recordId,
         },
       },
     };
@@ -114,15 +117,16 @@ export class UsersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    UsersService.setVikaOptions({
+    const userCur = new Env();
+    userCur.setVikaOptions({
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
     // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
     // console.debug('ServeLoginVika:', res);
 
-    const res = await UsersService.findAll();
-    const data = res.map((item: any) => {
+    const res = await userCur.findAll();
+    const data = res.data.map((item: any) => {
       const field = item.fields;
       field.id = item.recordId;
       return field;
@@ -134,7 +138,57 @@ export class UsersController {
       data,
     };
 
-    console.debug('resInfo:', JSON.stringify(resInfo));
+    // console.debug('config resInfo:', JSON.stringify(resInfo));
+    return resInfo;
+  }
+
+  @Get('config/keys')
+  async getConfigKeys(@Request() req: any) {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const userCur = new Env();
+    userCur.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
+    // console.debug('ServeLoginVika:', res);
+
+    const res = await userCur.findAll();
+    const data = res.data.map((item: any) => {
+      const field = item.fields;
+      field.id = item.recordId;
+      return field;
+    });
+
+    const vikaData: any = {};
+    const configRecords = data;
+
+    for (let i = 0; i < configRecords.length; i++) {
+      const fields: any = configRecords[i];
+
+      if (fields['key']) {
+        if (fields['value'] && ['false', 'true'].includes(fields['value'])) {
+          vikaData[fields['key'] as string] = fields['value'] === 'true';
+        } else {
+          vikaData[fields['key'] as string] = fields['value'] || '';
+        }
+      }
+    }
+
+    const resInfo: any = {
+      code: 200,
+      message: 'success',
+      data: vikaData,
+    };
+
+    // console.debug('config resInfo:', JSON.stringify(resInfo));
     return resInfo;
   }
 
@@ -148,16 +202,17 @@ export class UsersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    UsersService.setVikaOptions({
+    const userCur = new Env();
+    userCur.setVikaOptions({
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
     // const res = await UsersService.findByField('key', 'BASE_BOT_ID');
     // console.debug('ServeLoginVika:', res);
 
-    const res = await UsersService.findAll();
+    const res = await userCur.findAll();
     const data: any = {};
-    res.forEach((item: any) => {
+    res.data.forEach((item: any) => {
       const field = item.fields;
       if (field.value === 'true') {
         field.value = true;
@@ -180,14 +235,47 @@ export class UsersController {
       data,
     };
 
-    console.debug('userInfo:', JSON.stringify(resInfo));
+    // console.debug('config/group resInfo:', JSON.stringify(resInfo));
     return resInfo;
   }
 
   // 批量更新配置信息
   @Post('config')
   async setConfig(@Request() req: any, @Body() body: any) {
-    console.debug('setConfig body:', body);
+    console.debug('user/update body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    const env = new Env();
+    // console.debug(db);
+    env.setVikaOptions({
+      apiKey: db.token,
+      baseId: db.dataBaseIds.envSheet, // 设置 base ID
+    });
+    const res = await env.updatEmultiple(body);
+    console.debug('update config:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+    if (res.message === 'success') {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+
+    return data;
+  }
+
+  // 批量更新配置信息
+  @Post('config/bykey')
+  async updateConfig(@Request() req: any, @Body() body: any) {
+    console.debug('user/config/bykey body:', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -196,23 +284,34 @@ export class UsersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    UsersService.setVikaOptions({
+    const env = new Env();
+    env.setVikaOptions({
       apiKey: db.token,
       baseId: db.dataBaseIds.envSheet, // 设置 base ID
     });
-    const res = await UsersService.updatEmultiple(body);
-    console.debug('update config:', res);
+    await delay(500);
+    const res = await env.findByField('key', body.key);
+    console.debug('wait update config:', res);
+    const recordId = res.data[0]?.recordId as string;
+    const fields = res.data[0]?.fields as any;
+    fields.value = body.value;
+    await delay(500);
     const data: any = {
       code: 400,
       message: 'fail',
       data: {},
     };
-    if (res.success) {
-      data.code = 200;
-      data.message = 'success';
-      data.data = res;
+    try {
+      const resUpdate = await env.update(recordId, fields);
+      console.debug('update config:', resUpdate);
+      if (resUpdate.data.updatedAt) {
+        data.code = 200;
+        data.message = 'success';
+        data.data = resUpdate;
+      }
+    } catch (e) {
+      console.error('update config error:', e);
     }
-
     return data;
   }
 }

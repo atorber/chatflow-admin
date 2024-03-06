@@ -2,8 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Store } from '../../db/store';
-import { VikaDB } from '../../db/vika-db';
+import { BiTable } from '../../db/mod.js';
 import { delay } from '../../utils/utils';
+import { Env } from '../../db/vikaModel/Env/db.js';
+import { Messages } from '../../db/vikaModel/Message/db.js';
+import { Chatbots } from '../../db/vikaModel/ChatBot/db.js';
+import { ChatbotUsers } from '../../db/vikaModel/ChatBotUser/db.js';
+import { Contacts } from '../../db/vikaModel/Contact/db.js';
+import { Groupnotices } from '../../db/vikaModel/GroupNotice/db.js';
+import { Groups } from '../../db/vikaModel/Group/db.js';
+import { Keywords } from '../../db/vikaModel/Keyword/db.js';
+import { Notices } from '../../db/vikaModel/Notice/db.js';
+import { Orders } from '../../db/vikaModel/Order/db.js';
+import { Qas } from '../../db/vikaModel/Qa/db.js';
+import { Rooms } from '../../db/vikaModel/Room/db.js';
+import { Statistics } from '../../db/vikaModel/Statistic/db.js';
+import { Whitelists } from '../../db/vikaModel/WhiteList/db.js';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +27,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
+    const user = await this.usersService.findUser(username);
     if (user && user.password === pass) {
       const { ...result } = user;
       return result;
@@ -28,44 +42,154 @@ export class AuthService {
     };
   }
 
-  async signIn(username: string, pass: string) {
-    let user = await this.usersService.findOne(username);
-    // console.debug('ServeLoginVika:', user);
-
-    // 如果用户不存在，则验证并创建用户
-    const userNew = new VikaDB();
-    const userID = await userNew.init({
+  async init(username: string, pass: string) {
+    const db = new BiTable();
+    const res = await db.createSheet({
       token: pass,
       spaceId: username,
     });
     delay(500);
-    if (userID.data) {
-      userNew.username = username;
-      user = userNew;
-      UsersService.setVikaOptions({
-        apiKey: user.token,
-        baseId: user.dataBaseIds.envSheet, // 设置 base ID
+    return res;
+  }
+
+  async signIn(username: string, pass: string) {
+    let userCur = await this.usersService.findUser(username);
+    // console.debug('ServeLoginVika:', user);
+
+    // 如果用户不存在，则验证并创建用户
+    const db = new BiTable();
+    const dbInit = await db.init({
+      token: pass,
+      spaceId: username,
+    });
+    delay(500);
+    if (dbInit.data) {
+      db.username = username;
+      userCur = db;
+      userCur.db = {};
+
+      const env = new Env();
+      env.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.envSheet, // 设置 base ID
       });
-      const resEnv = await UsersService.findAll();
-      console.debug('ServeLoginVika:', resEnv.length);
+      userCur.db.env = env;
+
+      const message = new Messages();
+      message.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.messageSheet, // 设置 base ID
+      });
+      userCur.db.message = message;
+
+      const chatbot = new Chatbots();
+      chatbot.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.chatBotSheet, // 设置 base ID
+      });
+      userCur.db.chatBot = chatbot;
+
+      const chatbotUser = new ChatbotUsers();
+      chatbotUser.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.chatBotUserSheet, // 设置 base ID
+      });
+      userCur.db.chatBotUser = chatbotUser;
+
+      const contact = new Contacts();
+      contact.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.contactSheet, // 设置 base ID
+      });
+      userCur.db.contact = contact;
+
+      const groupnotice = new Groupnotices();
+      groupnotice.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
+      });
+      userCur.db.groupnotice = groupnotice;
+
+      const group = new Groups();
+      group.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.groupSheet, // 设置 base ID
+      });
+      userCur.db.group = group;
+
+      const keyword = new Keywords();
+      keyword.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.keywordSheet, // 设置 base ID
+      });
+      userCur.db.keyword = keyword;
+
+      const notice = new Notices();
+      notice.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.noticeSheet, // 设置 base ID
+      });
+      userCur.db.notice = notice;
+
+      const order = new Orders();
+      order.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.orderSheet, // 设置 base ID
+      });
+      userCur.db.order = order;
+
+      const qa = new Qas();
+      qa.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.qaSheet, // 设置 base ID
+      });
+      userCur.db.qa = qa;
+
+      const room = new Rooms();
+      room.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.roomSheet, // 设置 base ID
+      });
+      userCur.db.room = room;
+
+      const statistic = new Statistics();
+      statistic.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
+      });
+      userCur.db.statistic = statistic;
+
+      const whitelist = new Whitelists();
+      whitelist.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
+      });
+      userCur.db.whiteList = whitelist;
+
+      // 获取配置信息
+      const resEnv = await env.findAll();
+      // console.debug('ServeLoginVika:', resEnv.data.length);
+
       const config: any = {};
-      resEnv.map((item: any) => {
+      resEnv.data.map((item: any) => {
         config[item.fields.key] = item.fields.value || undefined;
       });
       const BASE_BOT_ID: string = config['BASE_BOT_ID'] || '';
       // console.debug('ServeLoginVika:', BASE_BOT_ID);
-      userNew.id = BASE_BOT_ID;
+      db.id = BASE_BOT_ID;
 
       const BASE_BOT_NAME: string = config['BASE_BOT_NAME'] || '';
       // console.debug('ServeLoginVika:', BASE_BOT_NAME);
 
-      userNew.nickname = BASE_BOT_NAME || '';
-      userNew.password = pass;
-      userNew.config = config;
-      Store.addUser(userNew);
+      db.nickname = BASE_BOT_NAME || '';
+      db.password = pass;
+      db.config = config;
+
+      // 缓存用户
+      Store.addUser(userCur);
       const payload = {
-        username: user.username,
-        sub: user.userId,
+        username: userCur.username,
+        sub: userCur.userId,
       };
       console.debug(Store.users.length);
       return {

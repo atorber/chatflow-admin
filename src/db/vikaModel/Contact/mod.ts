@@ -5,7 +5,7 @@ import type {
   // Field,
 } from '../Model';
 
-import { replaceSyncStatus, actionState } from '../actionBar';
+import { replaceSyncStatus, actionState } from '../actionBar.js';
 
 const name = '好友列表|Contact';
 const code = 'contactSheet';

@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/order')
@@ -21,12 +20,8 @@ export class OrdersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    OrdersService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.orderSheet, // 设置 base ID
-    });
-    const data = await OrdersService.findAll();
-    const items = data.map((value: any) => {
+    const data = await db.db.order.findAll();
+    const items = data.data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
       return fields;
@@ -39,8 +34,8 @@ export class OrdersController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
-        list: items,
+        itemCount: data.data.length,
+        items: items,
       },
     };
     return res;
@@ -55,14 +50,11 @@ export class OrdersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    OrdersService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.orderSheet, // 设置 base ID
-    });
-    const resCreate: any = await OrdersService.create(body);
+
+    const resCreate = await db.db.order.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -74,7 +66,7 @@ export class OrdersController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('order delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -83,20 +75,18 @@ export class OrdersController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    OrdersService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.orderSheet, // 设置 base ID
-    });
 
-    const resDel = await OrdersService.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    const resDel = await db.db.order.delete(body.recordId);
+    console.debug('order resDel', resDel);
 
     let res: any = '';
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     } else {
       res = {

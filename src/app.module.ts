@@ -41,6 +41,9 @@ import { ChatbotsModule } from './modules/chatbots/chatbots.module';
 import { CopilotService } from './modules/copilot/copilot.service';
 import { CopilotController } from './modules/copilot/copilot.controller';
 import { CopilotModule } from './modules/copilot/copilot.module';
+import { GroupsService } from './modules/groups/groups.service';
+import { GroupsController } from './modules/groups/groups.controller';
+import { GroupsModule } from './modules/groups/groups.module';
 
 @Module({
   imports: [
@@ -60,6 +63,7 @@ import { CopilotModule } from './modules/copilot/copilot.module';
     OrdersModule,
     ChatbotsModule,
     CopilotModule,
+    GroupsModule,
   ],
   controllers: [
     AppController,
@@ -76,6 +80,7 @@ import { CopilotModule } from './modules/copilot/copilot.module';
     OrdersController,
     ChatbotsController,
     CopilotController,
+    GroupsController,
   ],
   providers: [
     AppService,
@@ -90,6 +95,7 @@ import { CopilotModule } from './modules/copilot/copilot.module';
     OrdersService,
     ChatbotsService,
     CopilotService,
+    GroupsService,
   ],
 })
 export class AppModule {}

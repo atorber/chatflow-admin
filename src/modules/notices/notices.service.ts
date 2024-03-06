@@ -1,58 +1,137 @@
 import { Injectable } from '@nestjs/common';
-import { BaseEntity, MappingOptions } from '../../utils/vika-orm'; // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
-
 @Injectable()
-export class NoticesService extends BaseEntity {
-  desc?: string; // 定义名字属性，可选
+export class NoticesService {
+  getTimedTask(taskRecords: any[]): TaskConfig[] {
+    const timedTasks: TaskConfig[] = taskRecords
+      .map((fields: any) => {
+        const { desc, time, cycle, type, name, id, alias, state, recordId } =
+          fields as TaskFields;
 
-  id?: string;
+        const isActive = state === '开启';
+        const isContact = type === '好友';
+        const target = isContact
+          ? { name: name || '', id: id || '', alias: alias || '' }
+          : { topic: name || '', id: id || '' };
 
-  name?: string;
+        const taskConfig: TaskConfig = {
+          id: recordId,
+          msg: desc || '',
+          time: Number(time) || 0,
+          cycle: cycle || '无重复',
+          targetType: isContact ? 'contact' : 'room',
+          target,
+          active: isActive,
+          rule: '',
+        };
 
-  type?: string;
+        taskConfig.rule = getRule(taskConfig);
 
-  alias?: string;
+        return isActive && desc && time && cycle && (name || id || alias)
+          ? taskConfig
+          : null;
+      })
+      .filter(Boolean) as TaskConfig[];
 
-  time?: number;
-
-  cycle?: string;
-
-  state?: string;
-
-  syncStatus?: string;
-
-  lastOperationTime?: string;
-
-  action?: string;
-
-  // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
-
-  protected static override mappingOptions: MappingOptions = {
-    // 定义字段映射选项
-    fieldMapping: {
-      // 字段映射
-      id: '好友ID/群ID(选填)|id', // 将 id 映射到 '好友ID/群ID(选填)' 字段
-      name: '昵称/群名称|name',
-      type: '通知目标类型|type',
-      desc: '内容|desc',
-      alias: '好友备注(选填)|alias',
-      time: '时间|time',
-      cycle: '周期|cycle',
-      state: '启用状态|state',
-      syncStatus: '同步状态|syncStatus',
-      lastOperationTime: '最后操作时间|lastOperationTime',
-      action: '操作|action',
-    },
-    tableName: '定时提醒|Notice', // 表名
-  };
-
-  protected static override getMappingOptions(): MappingOptions {
-    // 获取映射选项的方法
-    return this.mappingOptions; // 返回当前类的映射选项
-  }
-
-  static override setMappingOptions(options: MappingOptions) {
-    // 设置映射选项的方法
-    this.mappingOptions = options; // 更新当前类的映射选项
+    return timedTasks;
   }
 }
+
+const getRule = (task: TaskConfig) => {
+  const curTimeF = new Date(task.time);
+  // const curTimeF = new Date(task.time+8*60*60*1000)
+  let curRule = '* * * * * *';
+  let dayOfWeek: any = '*';
+  let month: any = '*';
+  let dayOfMonth: any = '*';
+  let hour: any = curTimeF.getHours();
+  let minute: any = curTimeF.getMinutes();
+  const second = 0;
+  const addMonth = [];
+  switch (task.cycle) {
+    case '每季度':
+      month = curTimeF.getMonth();
+      for (let i = 0; i < 4; i++) {
+        if (month + 3 <= 11) {
+          addMonth.push(month);
+        } else {
+          addMonth.push(month - 9);
+        }
+        month = month + 3;
+      }
+      month = addMonth;
+      break;
+    case '每天':
+      break;
+    case '每周':
+      dayOfWeek = curTimeF.getDay();
+      break;
+    case '每月':
+      month = curTimeF.getMonth();
+      break;
+    case '每小时':
+      hour = '*';
+      break;
+    case '每30分钟':
+      hour = '*';
+      minute = [0, 30];
+      break;
+    case '每15分钟':
+      hour = '*';
+      minute = [0, 15, 30, 45];
+      break;
+    case '每10分钟':
+      hour = '*';
+      minute = [0, 10, 20, 30, 40, 50];
+      break;
+    case '每5分钟':
+      hour = '*';
+      minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+      break;
+    case '每分钟':
+      hour = '*';
+      minute = '*';
+      break;
+    default:
+      month = curTimeF.getMonth();
+      dayOfMonth = curTimeF.getDate();
+      break;
+  }
+  curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+  return curRule;
+};
+
+export type TaskFields = {
+  desc?: string;
+  time?: string;
+  cycle?: string;
+  type?: string;
+  name?: string;
+  id?: string;
+  alias?: string;
+  state?: string;
+  recordId: string;
+};
+
+export interface TaskConfig {
+  id: string;
+  msg: string;
+  time: number;
+  cycle: string;
+  targetType: 'contact' | 'room';
+  target: BusinessRoom | BusinessUser;
+  active: boolean;
+  rule: string;
+}
+
+export type BusinessRoom = {
+  id?: string;
+  luckyDog?: string;
+  memberAlias?: string;
+  topic: string;
+};
+
+export type BusinessUser = {
+  alias?: string;
+  id?: string;
+  name: string;
+};

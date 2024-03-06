@@ -152,7 +152,7 @@ export class VikaSheet {
       // console.info(records)
       return records;
     } else {
-      console.error('获取数据记录失败：', JSON.stringify(response));
+      console.error('find获取数据记录失败：', JSON.stringify(response));
       return response;
     }
   }
@@ -168,7 +168,7 @@ export class VikaSheet {
       // console.info(records)
       return {};
     } else {
-      console.error('获取数据记录失败：', JSON.stringify(response));
+      console.error('findOne获取数据记录失败：', JSON.stringify(response));
       return response;
     }
   }

@@ -4,10 +4,10 @@ import type {
   Sheet,
   // Field,
 } from '../Model';
-import { vikaFields } from './fields';
-import { defaultRecords } from './records';
+import { vikaFields } from './fields.js';
+import { defaultRecords } from './records.js';
 
-import { replaceSyncStatus, actionState } from '../actionBar';
+import { replaceSyncStatus, actionState } from '../actionBar.js';
 
 const name = '白名单|WhiteList';
 const code = 'whiteListSheet';

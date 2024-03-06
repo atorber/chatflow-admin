@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { KeywordsService } from './keywords.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/keyword')
@@ -21,12 +20,8 @@ export class KeywordsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    KeywordsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.keywordSheet, // 设置 base ID
-    });
-    const data = await KeywordsService.findAll();
-    const items = data.map((value: any) => {
+    const data = await db.db.keyword.findAll();
+    const items = data.data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
       return fields;
@@ -39,8 +34,8 @@ export class KeywordsController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
-        list: items,
+        itemCount: data.data.length,
+        items: items,
       },
     };
     return res;
@@ -55,14 +50,11 @@ export class KeywordsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    KeywordsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.keywordSheet, // 设置 base ID
-    });
-    const resCreate: any = await KeywordsService.create(body);
+
+    const resCreate = await db.db.keyword.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -75,7 +67,7 @@ export class KeywordsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('keyword delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -84,16 +76,12 @@ export class KeywordsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    KeywordsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.keywordSheet, // 设置 base ID
-    });
 
-    const resDel = await KeywordsService.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    const resDel = await db.db.keyword.delete(body.recordId);
+    console.debug('keyword resDel', resDel);
 
     let res: any = '';
-    if (resDel.success) {
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',

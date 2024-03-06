@@ -5,10 +5,10 @@ import type {
   // Field,
 } from '../Model';
 
-import { vikaFields } from './fields';
-import { defaultRecords } from './records';
+import { vikaFields } from './fields.js';
+import { defaultRecords } from './records.js';
 
-import { replaceSyncStatus, actionState } from '../actionBar';
+import { replaceSyncStatus, actionState } from '../actionBar.js';
 
 const name = '统计打卡|Statistic';
 const code = 'statisticSheet';

@@ -7,7 +7,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { QasService } from './qas.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/qa')
@@ -22,33 +21,31 @@ export class QasController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    QasService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
-    });
-    let data: any = [];
+    let data;
     if (query.keyword) {
-      data = await QasService.findByQuery(query.keyword);
+      data = await db.db.qa.findByQuery(query.keyword);
     } else {
-      data = await QasService.findAll();
+      data = await db.db.qa.findAll();
     }
-    const items = data.map((value: any) => {
-      const fields = value.fields;
-      fields.recordId = value.recordId;
-      return fields;
-    });
-    // console.debug(data);
     const res: any = {
-      code: 200,
-      message: 'success',
-      data: {
+      code: 400,
+      message: 'error',
+      data,
+    };
+    if (data.data.length) {
+      const items = data.data.map((value: any) => {
+        const fields = value.fields;
+        fields.recordId = value.recordId;
+        return fields;
+      });
+      res.data = {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
-        list: items,
-      },
-    };
+        itemCount: data.data.length,
+        items: items,
+      };
+    }
     return res;
   }
   @Post('create')
@@ -62,21 +59,20 @@ export class QasController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    QasService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
-    });
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
-      const resCreate: any = await QasService.create(body);
+      const resCreate = await db.db.qa.create(body);
+      res.data = resCreate;
       console.debug('resCreate', resCreate);
-      if (resCreate.recordId) {
+      if (resCreate.data.recordId) {
         res.code = 200;
         res.message = 'success';
         res.data = resCreate;
       }
     } catch (e) {
       console.error(e);
+      res.message = 'error';
+      res.data = e;
     }
     return res;
   }
@@ -90,10 +86,6 @@ export class QasController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    QasService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
-    });
     return '';
   }
   @Post('delete')
@@ -110,26 +102,20 @@ export class QasController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    QasService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.qaSheet, // 设置 base ID
-    });
 
-    const resDel = await QasService.delete(body.recordId);
+    const resDel = await db.db.qa.delete(body.recordId);
     console.debug('qa resDel', resDel);
 
-    let res: any = '';
-    if (resDel.success) {
-      res = {
-        code: 200,
-        message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+    const res: any = {
+      code: 400,
+      message: 'error',
+      data: resDel,
+    };
+    if (resDel.message === 'success') {
+      res.code = 200;
+      res.message = 'success';
+      res.data = {
+        recordId: body.recordId,
       };
     }
     return res;

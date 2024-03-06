@@ -1,6 +1,6 @@
 {
   "name": "chatflow-admin",
-  "version": "0.6.8",
+  "version": "3.0.0-Beta-7",
   "description": "",
   "author": "",
   "private": true,
@@ -18,9 +18,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:lark-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./test/lark-orm-test.ts",
+    "test:vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./test/vika-orm-test.ts",
     "cm": "ts-node ./scripts/createModule.ts"
   },
   "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.23.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
@@ -30,6 +33,7 @@
     "aws-sdk": "^2.1509.0",
     "axios": "^1.6.2",
     "boxen": "^7.1.1",
+    "cross-env": "^7.0.3",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.3.1",
     "mqtt": "^5.3.0",
@@ -66,8 +70,7 @@
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.3"
+    "tsconfig-paths": "^4.2.0"
   },
   "jest": {
     "moduleFileExtensions": [

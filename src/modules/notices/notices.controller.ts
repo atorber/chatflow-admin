@@ -6,11 +6,12 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { NoticesService } from './notices.service.js';
 import { Store } from '../../db/store.js';
+import { NoticesService } from './notices.service.js';
 
 @Controller('api/v1/notice')
 export class NoticesController {
+  constructor(private readonly noticesService: NoticesService) {}
   @Get('list')
   async findAll(@Request() req: any): Promise<string> {
     const user = req.user;
@@ -21,12 +22,8 @@ export class NoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    NoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.noticeSheet, // 设置 base ID
-    });
-    const data = await NoticesService.findAll();
-    const items = data.map((value: any) => {
+    const data = await db.db.notice.findAll();
+    const items = data.data.map((value: any) => {
       const fields = value.fields;
       fields.recordId = value.recordId;
       return fields;
@@ -39,8 +36,42 @@ export class NoticesController {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
-        list: items,
+        itemCount: data.data.length,
+        items: items,
+      },
+    };
+    return res;
+  }
+
+  @Get('task')
+  async getTimedTask(@Request() req: any): Promise<string> {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const data = await db.db.notice.findAll();
+    const items = data.data.map((value: any) => {
+      const fields = value.fields;
+      fields.recordId = value.recordId;
+      return fields;
+    });
+
+    const jobs = this.noticesService.getTimedTask(items);
+
+    // console.debug(data);
+    const res: any = {
+      code: 200,
+      message: 'success',
+      data: {
+        page: 1,
+        pageSize: 1000,
+        pageCount: 1,
+        itemCount: jobs.length,
+        items: jobs,
       },
     };
     return res;
@@ -55,14 +86,11 @@ export class NoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    NoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.noticeSheet, // 设置 base ID
-    });
-    const resCreate: any = await NoticesService.create(body);
+
+    const resCreate = await db.db.notice.create(body);
     console.debug('resCreate', resCreate);
     const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -74,7 +102,7 @@ export class NoticesController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('notice delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -83,26 +111,22 @@ export class NoticesController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    NoticesService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.noticeSheet, // 设置 base ID
-    });
 
-    const resDel = await NoticesService.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    const resDel = await db.db.notice.delete(body.recordId);
+    console.debug('notice resDel', resDel);
 
-    let res: any = '';
-    if (resDel.success) {
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     }
     return res;

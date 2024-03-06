@@ -38,6 +38,43 @@ export class AuthController {
     }
   }
 
+  @Public()
+  @Post('init')
+  async init(
+    @Body() signInDto: { password: string; mobile: string; platform?: string },
+  ) {
+    console.log(signInDto);
+    const token = signInDto.password;
+    const spaceId = signInDto.mobile;
+    try {
+      const res = await this.authService.init(spaceId, token);
+      console.info('init res:', res);
+      if (res.message === 'success') {
+        return {
+          code: 200,
+          message: 'success',
+          data: {
+            token: token,
+            spaceId: spaceId,
+          },
+        };
+      } else {
+        return {
+          code: 400,
+          message: '初始化失败! ',
+          data: res,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+      return {
+        code: 400,
+        message: '初始化失败! ',
+        data: e,
+      };
+    }
+  }
+
   @Post('logout')
   async logout(@Body() body: any) {
     console.info(body);

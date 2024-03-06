@@ -6,7 +6,6 @@ import {
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { StatisticsService } from './statistics.service.js';
 import { Store } from '../../db/store.js';
 
 @Controller('api/v1/statistic')
@@ -21,29 +20,36 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
-    const data = await StatisticsService.findAll();
-    const items = data.map((value: any) => {
-      const fields = value.fields;
-      fields.recordId = value.recordId;
-      return fields;
-    });
-    // console.debug(data);
-    const res: any = {
-      code: 200,
-      message: 'success',
-      data: {
+    try {
+      const data = await db.db.statistic.findAll();
+      // console.debug('Statistics data', data);
+      const res: any = {
+        code: 200,
+        message: 'success',
+        data,
+      };
+      const items = data.data.map((value: any) => {
+        const fields = value.fields;
+        fields.recordId = value.recordId;
+        return fields;
+      });
+      res.data = {
         page: 1,
         pageSize: 1000,
         pageCount: 1,
-        itemCount: data.length,
-        list: items,
-      },
-    };
-    return res;
+        itemCount: data.data.length,
+        items: items,
+      };
+      return res;
+    } catch (e) {
+      console.error(e);
+      const res: any = {
+        code: 400,
+        message: 'error',
+        data: e,
+      };
+      return res;
+    }
   }
   @Post('create')
   async create(@Body() body: any, @Request() req: any): Promise<string> {
@@ -55,14 +61,11 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
-    const resCreate: any = await StatisticsService.create(body);
+
+    const resCreate = await db.db.statistic.create(body);
     console.debug('resCreate', resCreate);
-    const res: any = { code: 400, message: 'fail', data: {} };
-    if (resCreate.recordId) {
+    const res: any = { code: 400, message: 'fail', data: { data: resCreate } };
+    if (resCreate.data.recordId) {
       res.code = 200;
       res.message = 'success';
       res.data = resCreate;
@@ -74,7 +77,7 @@ export class StatisticsController {
     //   {
     //     "recordId":21705
     // }
-    console.debug('qa delete', body);
+    console.debug('statistic delete', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -83,26 +86,22 @@ export class StatisticsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    StatisticsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.statisticSheet, // 设置 base ID
-    });
 
-    const resDel = await StatisticsService.delete(body.recordId);
-    console.debug('qa resDel', resDel);
+    const resDel = await db.db.statistic.delete(body.recordId);
+    console.debug('statistic resDel', resDel);
 
-    let res: any = '';
-    if (resDel.success) {
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: resDel,
+    };
+    if (resDel.message === 'success') {
       res = {
         code: 200,
         message: 'success',
-        data: {},
-      };
-    } else {
-      res = {
-        code: 400,
-        message: 'error',
-        data: {},
+        data: {
+          recordId: body.recordId,
+        },
       };
     }
     return res;

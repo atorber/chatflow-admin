@@ -6,8 +6,8 @@ import type {
   Sheet,
   // Field,
 } from '../Model';
-import { vikaFields } from './fields';
-import { defaultRecords } from './records';
+import { vikaFields } from './fields.js';
+import { defaultRecords } from './records.js';
 
 export const stockSheet: Sheet = {
   fields: vikaFields.data.fields,

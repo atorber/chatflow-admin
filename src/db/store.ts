@@ -1,10 +1,10 @@
-import { VikaDB } from './vika-db.js';
+import { BiTable } from './mod.js';
 
 export class Store {
-  static users: VikaDB[] = [];
+  static users: BiTable[] = [];
 
   // 注册用户
-  static addUser(user: VikaDB) {
+  static addUser(user: BiTable) {
     if (user.userId) {
       Store.users.push(user);
     }

@@ -28,11 +28,7 @@ export class RoomsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    RoomsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.roomSheet, // 设置 base ID
-    });
-    const res = await RoomsService.findAll();
+    const res = await db.db.room.findAll();
     // console.debug(res);
     const groups: any = {
       code: 200,
@@ -52,7 +48,7 @@ export class RoomsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         if (value.fields.topic) {
           return {
@@ -68,17 +64,159 @@ export class RoomsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     groups.data.items = items;
     return groups;
   }
 
+  @Get('list/raw')
+  async findAllRaw(@Request() req: any): Promise<string> {
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const res = await db.db.room.findAll();
+    // console.debug(res);
+    const rooms: any = {
+      code: 200,
+      message: 'success',
+      data: {
+        items: [],
+      },
+    };
+
+    const items: any[] = res.data
+      .map((value: any) => {
+        const fields = value.fields;
+        if (fields) {
+          fields.recordId = value.recordId;
+          return fields;
+        } else {
+          return false;
+        }
+      })
+      .filter((item: any) => item !== false);
+
+    rooms.data.items = items;
+    return rooms;
+  }
+
+  @Post('delete')
+  async delete(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('rooms delete', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+
+    const resDel = await db.db.room.delete(body.recordId);
+    console.debug('rooms resDel', resDel);
+
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
+    if (resDel.message === 'success') {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {
+          recordId: body.recordId,
+        },
+      };
+    }
+    return res;
+  }
+  @Post('deleteBatch')
+  async deleteBatch(@Body() body: any, @Request() req: any): Promise<string> {
+    //   {
+    //     "recordId":21705
+    // }
+    console.debug('rooms deleteBatch', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+
+    const resDel = await db.db.room.deleteBatch(body.recordIds);
+    console.debug('rooms resDel', resDel);
+
+    let res: any = {
+      code: 400,
+      message: 'error',
+      data: {},
+    };
+    if (resDel.message === 'success') {
+      res = {
+        code: 200,
+        message: 'success',
+        data: {
+          recordId: body.recordId,
+        },
+      };
+    }
+    return res;
+  }
+  // 批量更新
+  @Post('update')
+  async update(@Request() req: any, @Body() body: any) {
+    console.debug('room update body:', body);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const res = await db.db.room.updatEmultiple(body);
+    console.debug('update config:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: {},
+    };
+    if (res.message === 'success') {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+
+    return data;
+  }
   @Get('detail')
-  async findOne(@Query() query: { group_id: string }): Promise<string> {
+  async findOne(
+    @Request() req: any,
+    @Query() query: { group_id: string },
+  ): Promise<string> {
     console.debug('findOne', query);
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const db = Store.findUser(user.userId);
+    if (!db) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+
     const id = query.group_id;
-    console.debug('id', id);
     let group: any = {
       code: 200,
       message: 'success',
@@ -95,10 +233,10 @@ export class RoomsController {
         visit_card: '',
       },
     };
-    const res: any[] = await RoomsService.findByField('id', id);
+    const res = await db.db.room.findByField('id', id, 1);
     let item = {};
-    if (res.length > 0) {
-      const groupInfo = res[0].fields;
+    if (res.data.length > 0) {
+      const groupInfo = res.data[0].fields;
       item = {
         avatar:
           groupInfo.avatar ||
@@ -115,7 +253,8 @@ export class RoomsController {
     } else {
       group = {
         code: 305,
-        message: `strconv.ParseInt: parsing "${id}": value out of range`,
+        message: 'fail',
+        data: res,
       };
     }
 
@@ -141,6 +280,35 @@ export class RoomsController {
     // }
     console.debug(body);
     return { code: 200, message: 'success', data: { group_id: 1040 } };
+  }
+
+  // 批量更新配置信息
+  @Post('create/batch')
+  async createBatch(@Request() req: any, @Body() body: any) {
+    // console.debug('create records body:', JSON.stringify(body));
+    const user = req.user;
+    // console.debug(user);
+    // console.debug(Store.users);
+    const userCur = Store.findUser(user.userId);
+    // console.debug('create records db userCur:', userCur?.userId || undefined);
+    if (!userCur) {
+      throw new UnauthorizedException();
+    }
+    // console.debug(db);
+    const res = await userCur.db.room.createBatch(body);
+    // console.debug('create records res:', res);
+    const data: any = {
+      code: 400,
+      message: 'fail',
+      data: res,
+    };
+
+    if (res.message === 'success') {
+      data.code = 200;
+      data.message = 'success';
+      data.data = res.data;
+    }
+    return data;
   }
 
   @Post('invite')
@@ -685,11 +853,7 @@ export class RoomsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    RoomsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.roomSheet, // 设置 base ID
-    });
-    const res = await RoomsService.findAll();
+    const res = await db.db.room.findAll();
     // console.debug(res);
     let groups: any = {
       code: 200,
@@ -709,7 +873,7 @@ export class RoomsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         if (value.fields.topic) {
           return {
@@ -725,7 +889,7 @@ export class RoomsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     groups.data.items = items;
     groups = {
@@ -970,11 +1134,7 @@ export class RoomsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    RoomsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.contactSheet, // 设置 base ID
-    });
-    const res = await RoomsService.findAll();
+    const res = await db.db.room.findAll();
     // console.debug(res);
     let contacts: any = {
       code: 200,
@@ -996,7 +1156,7 @@ export class RoomsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         if (value.fields.name) {
           return {
@@ -1015,7 +1175,7 @@ export class RoomsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     contacts.data.items = items;
     contacts = {
@@ -1050,11 +1210,7 @@ export class RoomsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    RoomsService.setVikaOptions({
-      apiKey: db.token,
-      baseId: db.dataBaseIds.contactSheet, // 设置 base ID
-    });
-    const res = await RoomsService.findAll();
+    const res = await db.db.room.findAll();
     // console.debug(res);
     let contacts: any = {
       code: 200,
@@ -1076,7 +1232,7 @@ export class RoomsController {
       },
     };
 
-    const items = res
+    const items = res.data
       .map((value: any) => {
         if (value.fields.name) {
           return {
@@ -1095,7 +1251,7 @@ export class RoomsController {
         }
         return false;
       })
-      .filter((item) => item !== false);
+      .filter((item: any) => item !== false);
 
     contacts.data.items = items;
     contacts = { code: 200, message: 'success', data: { items: [] } };
