@@ -193,28 +193,38 @@ export class ChatbotsController {
       throw new UnauthorizedException();
     }
     // console.debug(db);
-    const { data: chatbots } = await db.db.chatBot.findAll();
+    const resChatbot = await db.db.chatBot.findAll();
+    console.debug('chatbot', JSON.stringify(resChatbot));
 
+    const chatbots = resChatbot.data;
     const chatBotUser = await db.db.chatBotUser.findAll();
+    console.debug('chatBotUser', JSON.stringify(chatBotUser));
+
     const items = chatBotUser.data;
+
     const data = items.map((value: any) => {
       const fields = value.fields;
-      fields.recordId = value.recordId;
-      fields.chatbot = chatbots.find(
-        (item: any) => item?.fields?.id === fields.id,
-      )?.fields;
-      if (fields['name'] || fields['id'] || fields['alias']) {
-        if (fields['type'] === '群') {
+      const chatbot = chatbots.find(
+        (item: any) => String(item.fields?.id) === fields.id,
+      );
+      console.debug('chatbot', JSON.stringify(chatbot));
+      if (chatbot) fields.chatbot = chatbot.fields;
+
+      if (fields['name'] || fields['wxid'] || fields['alias']) {
+        if (
+          fields['wxid'] &&
+          (fields['wxid'].includes('@') || fields['wxid'].includes('@@'))
+        ) {
           const room: BusinessRoom = {
             topic: fields['name'],
-            id: fields['id'],
+            id: fields['wxid'],
           };
           fields['room'] = room;
         } else {
           const contact: BusinessUser = {
             name: fields['name'],
             alias: fields['alias'],
-            id: fields['id'],
+            id: fields['wxid'],
           };
           fields['contact'] = contact;
         }
