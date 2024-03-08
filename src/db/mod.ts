@@ -1,8 +1,8 @@
-import { BiTable } from './vika-db.js';
-import { BaseEntity, MappingOptions } from './vika-orm.js';
+// import { BiTable } from './vika-db.js';
+// import { BaseEntity, MappingOptions } from './vika-orm.js';
 
-// import { BiTable } from './lark-db.js';
-// import { BaseEntity, MappingOptions } from './lark-orm.js';
+import { BiTable } from './lark-db.js';
+import { BaseEntity, MappingOptions } from './lark-orm.js';
 
 export { BiTable, BaseEntity, MappingOptions };
 

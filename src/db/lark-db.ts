@@ -21,6 +21,8 @@ import { Rooms } from './vikaModel/Room/db.js';
 import { Statistics } from './vikaModel/Statistic/db.js';
 import { Whitelists } from './vikaModel/WhiteList/db.js';
 import { Carpoolings } from './vikaModel/Carpooling/db.js';
+import { Medias } from './vikaModel/Media/db.js';
+import { Welcomes } from './vikaModel/Welcome/db.js';
 
 import * as lark from '@larksuiteoapi/node-sdk';
 
@@ -116,6 +118,8 @@ export class BiTable {
     statistic: Statistics;
     whiteList: Whitelists;
     carpooling: Carpoolings;
+    media: Medias;
+    welcome: Welcomes;
   };
 
   async init(config: BiTableConfig) {
