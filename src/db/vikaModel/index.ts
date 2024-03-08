@@ -17,6 +17,9 @@ import { sheet as groupNoticeSheet } from './GroupNotice/mod';
 import { sheet as chatBotSheet } from './ChatBot/mod';
 import { sheet as chatBotUserSheet } from './ChatBotUser/mod';
 import { sheet as groupSheet } from './Group/mod';
+import { sheet as welcomeSheet } from './Welcome/mod';
+import { sheet as mediaSheet } from './Media/mod';
+import { sheet as carpoolingSheet } from './Carpooling/mod';
 
 const sheets: Sheets = {
   qaSheet,
@@ -33,8 +36,10 @@ const sheets: Sheets = {
   chatBotSheet,
   chatBotUserSheet,
   groupSheet,
+  welcomeSheet,
+  mediaSheet,
+  carpoolingSheet,
   // stockSheet,
-  // groupSheet,
   // switchSheet,
   // roomWhiteListSheet,
   // contactWhiteListSheet,

@@ -315,6 +315,7 @@ export abstract class BaseEntity {
     console.info('findByField:', JSON.stringify(query));
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query);
+    console.info('findByField response:', JSON.stringify(response));
     if (response.success) {
       records = response.data.records;
       // console.info(records)

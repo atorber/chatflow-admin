@@ -18,6 +18,9 @@ import { Qas } from '../../db/vikaModel/Qa/db.js';
 import { Rooms } from '../../db/vikaModel/Room/db.js';
 import { Statistics } from '../../db/vikaModel/Statistic/db.js';
 import { Whitelists } from '../../db/vikaModel/WhiteList/db.js';
+import { Welcomes } from '../../db/vikaModel/Welcome/db.js';
+import { Medias } from '../../db/vikaModel/Media/db.js';
+import { Carpoolings } from '../../db/vikaModel/Carpooling/db.js';
 
 @Injectable()
 export class AuthService {
@@ -165,6 +168,27 @@ export class AuthService {
         baseId: db.dataBaseIds.whiteListSheet, // 设置 base ID
       });
       userCur.db.whiteList = whitelist;
+
+      const welcome = new Welcomes();
+      welcome.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.welcomeSheet, // 设置 base ID
+      });
+      userCur.db.welcome = welcome;
+
+      const media = new Medias();
+      media.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.mediaSheet, // 设置 base ID
+      });
+      userCur.db.media = media;
+
+      const carpooling = new Carpoolings();
+      carpooling.setVikaOptions({
+        apiKey: db.token,
+        baseId: db.dataBaseIds.carpoolingSheet, // 设置 base ID
+      });
+      userCur.db.carpooling = carpooling;
 
       // 获取配置信息
       const resEnv = await env.findAll();

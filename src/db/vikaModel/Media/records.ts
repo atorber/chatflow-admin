@@ -10,14 +10,11 @@ export const defaultRecords: any = {
       {
         recordId: 'recLYuFv3RgiB',
         fields: {
-          '所属应用|app': '智能问答|qa',
-          '类型|type': '好友',
-          '昵称/群名称|name': '大师',
-          '好友ID/群ID(选填)|id': 'ledongmao',
-          '好友备注(选填)|alias': 'chatflow作者',
-          '备注说明(选填)|info': '示例白名单',
+          名字: '世界第一初恋',
+          类型: '动漫番剧',
+          链接: '链接：https://xxx.com/abc 提取码：29me',
+          链接1: '',
           '启用状态|state': '开启',
-          '配额(选填)|quota': 20,
           '同步状态|syncStatus': '未同步',
           '最后操作时间|lastOperationTime': 1702519560557,
           '操作|action': '选择操作',
