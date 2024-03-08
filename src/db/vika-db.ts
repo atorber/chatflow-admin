@@ -1,4 +1,5 @@
 /* eslint-disable sort-keys */
+import { DateBase, BiTableConfig } from './mod.js';
 import { ICreateRecordsReqParams, Vika } from '@vikadata/vika';
 import type { Sheets } from './vikaModel/Model.js';
 import { sheets } from './vikaModel/index';
@@ -18,6 +19,9 @@ import { Qas } from './vikaModel/Qa/db.js';
 import { Rooms } from './vikaModel/Room/db.js';
 import { Statistics } from './vikaModel/Statistic/db.js';
 import { Whitelists } from './vikaModel/WhiteList/db.js';
+import { Welcomes } from './vikaModel/Welcome/db.js';
+import { Medias } from './vikaModel/Media/db.js';
+import { Carpoolings } from './vikaModel/Carpooling/db.js';
 
 type Field = {
   id?: string;
@@ -29,55 +33,8 @@ type Field = {
   isPrimary?: boolean;
 };
 
-export type BiTableConfig = {
-  spaceId: string;
-  token: string;
-};
-
-export interface DateBase {
-  messageSheet: string;
-  keywordSheet: string;
-  contactSheet: string;
-  roomSheet: string;
-  envSheet: string;
-  whiteListSheet: string;
-  noticeSheet: string;
-  statisticSheet: string;
-  orderSheet: string;
-  stockSheet: string;
-  groupNoticeSheet: string;
-  qaSheet: string;
-  chatBotSheet: string;
-  chatBotUserSheet: string;
-  groupSheet: string;
-}
-
-export class KeyDisplaynameMap {
-  private map: Map<string, string>;
-  private reverseMap: Map<string, string>;
-
-  constructor(fields: any[]) {
-    const initPairs: [string, string][] = fields.map((fields: any) => {
-      return this.transformKey(fields.name);
-    });
-    this.reverseMap = new Map(initPairs);
-    this.map = new Map(initPairs.map(([key, value]) => [value, key]));
-  }
-
-  transformKey(key: string): [string, string] {
-    return [key, key.split('|')[1] || key];
-  }
-
-  getKey(value: string): string | undefined {
-    return this.reverseMap.get(value);
-  }
-
-  getValue(key: string): string | undefined {
-    return this.map.get(key);
-  }
-}
-
 export class BiTable {
+  isInited: boolean = true;
   spaceName: string;
   username: string;
   nickname: string;
@@ -87,8 +44,30 @@ export class BiTable {
   vika: Vika;
   spaceId: string | undefined;
   userId: string | undefined;
-  dataBaseIds: DateBase;
+  dataBaseIds: DateBase = {
+    messageSheet: '',
+    keywordSheet: '',
+    contactSheet: '',
+    roomSheet: '',
+    envSheet: '',
+    whiteListSheet: '',
+    noticeSheet: '',
+    statisticSheet: '',
+    orderSheet: '',
+    stockSheet: '',
+    groupNoticeSheet: '',
+    qaSheet: '',
+    chatBotSheet: '',
+    chatBotUserSheet: '',
+    groupSheet: '',
+    welcomeSheet: '',
+    mediaSheet: '',
+    carpoolingSheet: '',
+  };
   dataBaseNames: DateBase;
+  dataBaseIdsMap: {
+    [key: string]: string;
+  } = {};
   isReady: boolean = true;
   hash: string;
   config: {
@@ -117,6 +96,9 @@ export class BiTable {
     room: Rooms;
     statistic: Statistics;
     whiteList: Whitelists;
+    welcome: Welcomes;
+    media: Medias;
+    carpooling: Carpoolings;
   };
   constructor(config?: BiTableConfig) {
     if (config) this.init(config);
@@ -130,64 +112,43 @@ export class BiTable {
     this.vika = new Vika({ token: config.token });
     this.token = config.token;
     this.password = this.token;
-    this.dataBaseIds = {
-      messageSheet: '',
-      keywordSheet: '',
-      contactSheet: '',
-      roomSheet: '',
-      envSheet: '',
-      whiteListSheet: '',
-      noticeSheet: '',
-      statisticSheet: '',
-      orderSheet: '',
-      stockSheet: '',
-      groupNoticeSheet: '',
-      qaSheet: '',
-      chatBotSheet: '',
-      chatBotUserSheet: '',
-      groupSheet: '',
-    };
     this.dataBaseNames = { ...this.dataBaseIds };
     this.config = {};
 
     try {
-      if (this.spaceId) {
-        const tables = await this.getNodesList();
-        // console.info(
-        //   '维格表文件列表：\n',
-        //   JSON.stringify(tables, undefined, 2),
-        // );
+      const tables = await this.getNodesList();
+      // console.info(
+      //   '维格表文件列表：\n',
+      //   JSON.stringify(tables, undefined, 2),
+      // );
 
-        if (tables) {
-          const client = config.token + config.spaceId;
-          console.debug(client);
-          this.hash = SHA256(client).toString();
-          await delay(1000);
+      if (tables) {
+        const client = config.token + config.spaceId;
+        console.debug(client);
+        this.hash = SHA256(client).toString();
+        await delay(1000);
 
-          for (const k in sheets) {
-            // console.info(this)
-            const sheet = sheets[k as keyof Sheets];
-            // console.info('数据模型：', k, sheet)
-            if (sheet && !tables[sheet.name]) {
-              console.info(`缺少数据表...\n${k}/${sheet.name}`);
-              this.isReady = false;
-              return { success: false, code: 400, data: '' };
-            } else if (sheet) {
-              // console.info(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
-              this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
-              this.dataBaseNames[k as keyof DateBase] = sheet.name;
-            }
+        for (const k in sheets) {
+          // console.info(this)
+          const sheet = sheets[k as keyof Sheets];
+          // console.info('数据模型：', k, sheet)
+          if (sheet && !tables[sheet.name]) {
+            console.info(`缺少数据表...\n${k}/${sheet.name}`);
+            this.isReady = false;
+            return { success: false, code: 400, data: '' };
+          } else if (sheet) {
+            console.info(
+              `表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`,
+            );
+            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
+            this.dataBaseNames[k as keyof DateBase] = sheet.name;
+            this.dataBaseIdsMap[tables[sheet.name] as string] = k;
           }
-          console.info('初始化表完成...');
-          return { success: true, code: 200, data: this.spaceId };
-        } else {
-          return { success: false, code: 400, data: '' };
         }
+        console.info('初始化表完成...');
+        return { success: true, code: 200, data: this.spaceId };
       } else {
-        console.info(
-          '指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息...',
-        );
-        return { message: 'success', code: 200, data: '' };
+        return { success: false, code: 400, data: '' };
       }
     } catch (error) {
       console.error('获取空间ID失败：', error);
@@ -200,23 +161,6 @@ export class BiTable {
     this.spaceId = config.spaceId;
     this.vika = new Vika({ token: config.token });
     this.token = config.token;
-    this.dataBaseIds = {
-      messageSheet: '',
-      keywordSheet: '',
-      contactSheet: '',
-      roomSheet: '',
-      envSheet: '',
-      whiteListSheet: '',
-      noticeSheet: '',
-      statisticSheet: '',
-      orderSheet: '',
-      stockSheet: '',
-      groupNoticeSheet: '',
-      qaSheet: '',
-      chatBotSheet: '',
-      chatBotUserSheet: '',
-      groupSheet: '',
-    };
     this.dataBaseNames = { ...this.dataBaseIds };
 
     try {
@@ -230,6 +174,7 @@ export class BiTable {
           const sheet = sheets[k as keyof Sheets];
           // console.info('数据模型：', k, sheet)
           if (sheet && !tables[sheet.name]) {
+            this.isInited = false;
             console.debug(`表不存在，创建表并初始化数据...${k}/${sheet.name}`);
             const fields = sheet.fields;
             // console.info('fields:', JSON.stringify(fields))
@@ -350,16 +295,21 @@ export class BiTable {
           } else if (sheet) {
             // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
             this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
-            this.dataBaseNames[sheet.name as keyof DateBase] =
-              tables[sheet.name];
+            this.dataBaseNames[k as keyof DateBase] = sheet.name;
+            this.dataBaseIdsMap[tables[sheet.name] as string] = k;
           } else {
             /* empty */
           }
         }
         console.debug('初始化表完成...');
-        const data = JSON.parse(JSON.stringify(this));
-        delete data.vika;
-        return { message: 'success', code: 200, data: JSON.stringify(data) };
+        if (this.isInited) {
+          const data = JSON.parse(JSON.stringify(this));
+          delete data.vika;
+          return { message: 'success', code: 200, data };
+        } else {
+          // 本次请求有新建表格，需要重新运行
+          await this.createSheet(config);
+        }
       } else {
         return { message: 'fail', code: 400, data: '' };
       }

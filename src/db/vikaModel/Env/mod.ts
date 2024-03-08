@@ -324,121 +324,6 @@ const defaultRecords: any = {
         },
       },
       {
-        recordId: 'rec3wtpjXE3Wm',
-        createdAt: 1694149442000,
-        updatedAt: 1694516873000,
-        fields: {
-          '标识|key': 'WEBHOOK_WEBHOOKMESSAGEPUSH',
-          '配置项|name': 'HTTP消息推送-WebHook推送',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc': 'TODO-开启后系统将机器人事件消息推送到指定的地址',
-          '值|value': 'false',
-        },
-      },
-      {
-        recordId: 'rec6gsmydj4eg',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'WEBHOOK_URL',
-          '配置项|name': 'HTTP消息推送-地址',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc':
-            '格式 http://baidu.com/abc,多个地址使用英文逗号隔开，使用post请求推送',
-        },
-      },
-      {
-        recordId: 'recbTf77gR2G8',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'WEBHOOK_TOKEN',
-          '配置项|name': 'HTTP消息推送-Token',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc':
-            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
-        },
-      },
-      {
-        recordId: 'recure3Q115gt',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'WEBHOOK_USERNAME',
-          '配置项|name': 'HTTP消息推送-用户名',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc':
-            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
-        },
-      },
-      {
-        recordId: 'rec4o1ExmfN3P',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'WEBHOOK_PASSWORD',
-          '配置项|name': 'HTTP消息推送-密码',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc':
-            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
-        },
-      },
-      {
-        recordId: 'recwRJEJCuesw',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'YUQUE_TOKEN',
-          '配置项|name': '语雀-token',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc': '语雀知识库token',
-        },
-      },
-      {
-        recordId: 'reckTO9r9MHFK',
-        createdAt: 1694149441000,
-        updatedAt: 1694149441000,
-        fields: {
-          '标识|key': 'YUQUE_NAMESPACE',
-          '配置项|name': '语雀-空间名称',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc': '语雀知识库空间名称',
-        },
-      },
-      {
-        recordId: 'recJg5CbSyIlu',
-        createdAt: 1694516737000,
-        updatedAt: 1694516927000,
-        fields: {
-          '标识|key': 'MESSAGE_ENCRYPT',
-          '配置项|name': '消息加密-下发消息加密',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '值|value': 'false',
-        },
-      },
-      {
-        recordId: 'recTUcZk8GobR',
-        createdAt: 1694516736000,
-        updatedAt: 1694516937000,
-        fields: {
-          '标识|key': 'MESSAGE_ENCODINGAESKEY',
-          '配置项|name': '消息加密-消息加密密钥',
-          '同步状态|syncStatus': '未同步',
-          '操作|action': '选择操作',
-          '说明|desc':
-            '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
-          '值|value': 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
-        },
-      },
-      {
         recordId: 'recAqIuUbtrJz',
         createdAt: 1701446368000,
         updatedAt: 1701449027000,
@@ -506,6 +391,121 @@ const defaultRecords: any = {
           '操作|action': '选择操作',
           '最后操作时间|lastOperationTime': 1701446461066,
           '说明|desc': '存储桶',
+        },
+      },
+      {
+        recordId: 'rec3wtpjXE3Wm',
+        createdAt: 1694149442000,
+        updatedAt: 1694516873000,
+        fields: {
+          '标识|key': 'WEBHOOK_WEBHOOKMESSAGEPUSH',
+          '配置项|name': 'HTTP消息推送-WebHook推送',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc': 'TODO-开启后系统将机器人事件消息推送到指定的地址',
+          '值|value': 'false',
+        },
+      },
+      {
+        recordId: 'rec6gsmydj4eg',
+        createdAt: 1694149441000,
+        updatedAt: 1694149441000,
+        fields: {
+          '标识|key': 'WEBHOOK_URL',
+          '配置项|name': 'HTTP消息推送-地址',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc':
+            '格式 http://baidu.com/abc,多个地址使用英文逗号隔开，使用post请求推送',
+        },
+      },
+      {
+        recordId: 'recbTf77gR2G8',
+        createdAt: 1694149441000,
+        updatedAt: 1694149441000,
+        fields: {
+          '标识|key': 'WEBHOOK_TOKEN',
+          '配置项|name': 'HTTP消息推送-Token',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc':
+            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
+        },
+      },
+      {
+        recordId: 'recure3Q115gt',
+        createdAt: 1694149441000,
+        updatedAt: 1694149441000,
+        fields: {
+          '标识|key': 'WEBHOOK_USERNAME',
+          '配置项|name': 'HTTP消息推送-用户名',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc':
+            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
+        },
+      },
+      {
+        recordId: 'rec4o1ExmfN3P',
+        createdAt: 1694149441000,
+        updatedAt: 1694149441000,
+        fields: {
+          '标识|key': 'WEBHOOK_PASSWORD',
+          '配置项|name': 'HTTP消息推送-密码',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc':
+            '当填写token时优先使用token，其次用户名+密码，再次无鉴权请求',
+        },
+      },
+      // {
+      //   recordId: 'recwRJEJCuesw',
+      //   createdAt: 1694149441000,
+      //   updatedAt: 1694149441000,
+      //   fields: {
+      //     '标识|key': 'YUQUE_TOKEN',
+      //     '配置项|name': '语雀-token',
+      //     '同步状态|syncStatus': '未同步',
+      //     '操作|action': '选择操作',
+      //     '说明|desc': '语雀知识库token',
+      //   },
+      // },
+      // {
+      //   recordId: 'reckTO9r9MHFK',
+      //   createdAt: 1694149441000,
+      //   updatedAt: 1694149441000,
+      //   fields: {
+      //     '标识|key': 'YUQUE_NAMESPACE',
+      //     '配置项|name': '语雀-空间名称',
+      //     '同步状态|syncStatus': '未同步',
+      //     '操作|action': '选择操作',
+      //     '说明|desc': '语雀知识库空间名称',
+      //   },
+      // },
+      {
+        recordId: 'recJg5CbSyIlu',
+        createdAt: 1694516737000,
+        updatedAt: 1694516927000,
+        fields: {
+          '标识|key': 'MESSAGE_ENCRYPT',
+          '配置项|name': '消息加密-下发消息加密',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '值|value': 'false',
+        },
+      },
+      {
+        recordId: 'recTUcZk8GobR',
+        createdAt: 1694516736000,
+        updatedAt: 1694516937000,
+        fields: {
+          '标识|key': 'MESSAGE_ENCODINGAESKEY',
+          '配置项|name': '消息加密-消息加密密钥',
+          '同步状态|syncStatus': '未同步',
+          '操作|action': '选择操作',
+          '说明|desc':
+            '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
+          '值|value': 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
         },
       },
     ],

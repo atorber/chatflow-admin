@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { Store } from '../../db/store.js';
 
-@Controller('api/v1/qa')
-export class QasController {
+@Controller('api/v1/carpooling')
+export class CarpoolingsController {
   @Get('list')
   async findAll(@Request() req: any, @Query() query: any): Promise<string> {
     const user = req.user;
@@ -23,9 +23,9 @@ export class QasController {
     // console.debug(db);
     let data;
     if (query.keyword) {
-      data = await db.db.qa.findByQuery(query.keyword);
+      data = await db.db.carpooling.findByQuery(query.keyword);
     } else {
-      data = await db.db.qa.findAll();
+      data = await db.db.carpooling.findAll();
     }
     const res: any = {
       code: 400,
@@ -50,7 +50,7 @@ export class QasController {
   }
   @Post('create')
   async create(@Body() body: any, @Request() req: any): Promise<string> {
-    console.debug('qa create', body);
+    console.debug('carpooling create', body);
     const user = req.user;
     // console.debug(user);
     // console.debug(Store.users);
@@ -61,7 +61,7 @@ export class QasController {
     // console.debug(db);
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
-      const resCreate = await db.db.welcome.create(body);
+      const resCreate = await db.db.carpooling.create(body);
       res.data = resCreate;
       console.debug('resCreate', resCreate);
       if (resCreate.data.recordId) {
@@ -73,50 +73,6 @@ export class QasController {
       console.error(e);
       res.message = 'error';
       res.data = e;
-    }
-    return res;
-  }
-  @Post('update')
-  async update(@Request() req: any): Promise<string> {
-    const user = req.user;
-    // console.debug(user);
-    // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
-      throw new UnauthorizedException();
-    }
-    // console.debug(db);
-    return '';
-  }
-  @Post('delete')
-  async delete(@Body() body: any, @Request() req: any): Promise<string> {
-    //   {
-    //     "recordId":21705
-    // }
-    console.debug('welcome delete', body);
-    const user = req.user;
-    // console.debug(user);
-    // console.debug(Store.users);
-    const db = Store.findUser(user.userId);
-    if (!db) {
-      throw new UnauthorizedException();
-    }
-    // console.debug(db);
-
-    const resDel = await db.db.welcome.delete(body.recordId);
-    console.debug('welcome resDel', resDel);
-
-    const res: any = {
-      code: 400,
-      message: 'error',
-      data: resDel,
-    };
-    if (resDel.message === 'success') {
-      res.code = 200;
-      res.message = 'success';
-      res.data = {
-        recordId: body.recordId,
-      };
     }
     return res;
   }

@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable camelcase */
 /* eslint-disable sort-keys */
+import { DateBase, BiTableConfig } from './mod.js';
 import type { Sheets, Record } from './vikaModel/Model.js';
 import { sheets } from './vikaModel/index.js';
 import { delay } from '../utils/utils';
@@ -19,6 +20,7 @@ import { Qas } from './vikaModel/Qa/db.js';
 import { Rooms } from './vikaModel/Room/db.js';
 import { Statistics } from './vikaModel/Statistic/db.js';
 import { Whitelists } from './vikaModel/WhiteList/db.js';
+import { Carpoolings } from './vikaModel/Carpooling/db.js';
 
 import * as lark from '@larksuiteoapi/node-sdk';
 
@@ -29,8 +31,7 @@ import * as lark from '@larksuiteoapi/node-sdk';
 //   params: {},
 // })
 // console.log(JSON.stringify(res.data))
-
-type Field = {
+export type Field = {
   id?: string;
   field_name: string;
   type: number;
@@ -48,55 +49,8 @@ export type LarkConfig = {
   appToken: string;
 };
 
-export type BiTableConfig = {
-  spaceId: string;
-  token: string;
-};
-
-export interface DateBase {
-  messageSheet: string;
-  keywordSheet: string;
-  contactSheet: string;
-  roomSheet: string;
-  envSheet: string;
-  whiteListSheet: string;
-  noticeSheet: string;
-  statisticSheet: string;
-  orderSheet: string;
-  stockSheet: string;
-  groupNoticeSheet: string;
-  qaSheet: string;
-  chatBotSheet: string;
-  chatBotUserSheet: string;
-  groupSheet: string;
-}
-
-export class KeyDisplaynameMap {
-  private map: Map<string, string>;
-  private reverseMap: Map<string, string>;
-
-  constructor(fields: any[]) {
-    const initPairs: [string, string][] = fields.map((fields: any) => {
-      return this.transformKey(fields.name);
-    });
-    this.reverseMap = new Map(initPairs);
-    this.map = new Map(initPairs.map(([key, value]) => [value, key]));
-  }
-
-  transformKey(key: string): [string, string] {
-    return [key, key.split('|')[1] || key];
-  }
-
-  getKey(value: string): string | undefined {
-    return this.reverseMap.get(value);
-  }
-
-  getValue(key: string): string | undefined {
-    return this.map.get(key);
-  }
-}
-
 export class BiTable {
+  isInited: boolean = true;
   nickname: string;
   id: string;
   spaceName!: string;
@@ -106,8 +60,30 @@ export class BiTable {
   username!: string;
   password!: string;
   isReady: boolean = true;
-  dataBaseIds!: DateBase;
+  dataBaseIds: DateBase = {
+    messageSheet: '',
+    keywordSheet: '',
+    contactSheet: '',
+    roomSheet: '',
+    envSheet: '',
+    whiteListSheet: '',
+    noticeSheet: '',
+    statisticSheet: '',
+    orderSheet: '',
+    stockSheet: '',
+    groupNoticeSheet: '',
+    qaSheet: '',
+    chatBotSheet: '',
+    chatBotUserSheet: '',
+    groupSheet: '',
+    welcomeSheet: '',
+    mediaSheet: '',
+    carpoolingSheet: '',
+  };
   dataBaseNames!: DateBase;
+  dataBaseIdsMap: {
+    [key: string]: string;
+  } = {};
   lark!: lark.Client;
   larkConfig!: LarkConfig;
   user_id: string | undefined;
@@ -139,6 +115,7 @@ export class BiTable {
     room: Rooms;
     statistic: Statistics;
     whiteList: Whitelists;
+    carpooling: Carpoolings;
   };
 
   async init(config: BiTableConfig) {
@@ -174,24 +151,6 @@ export class BiTable {
     //   this.config.user_id = user_id
     //   console.log('\nuser_id:', user_id)
     // }
-
-    this.dataBaseIds = {
-      messageSheet: '',
-      keywordSheet: '',
-      contactSheet: '',
-      roomSheet: '',
-      envSheet: '',
-      whiteListSheet: '',
-      noticeSheet: '',
-      statisticSheet: '',
-      orderSheet: '',
-      stockSheet: '',
-      groupNoticeSheet: '',
-      qaSheet: '',
-      chatBotSheet: '',
-      chatBotUserSheet: '',
-      groupSheet: '',
-    };
     this.dataBaseNames = { ...this.dataBaseIds };
 
     try {
@@ -221,6 +180,7 @@ export class BiTable {
             console.log(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`);
             this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
             this.dataBaseNames[k as keyof DateBase] = sheet.name;
+            this.dataBaseIdsMap[tables[sheet.name] as string] = k;
           }
         }
         console.debug('初始化表完成...');
@@ -268,24 +228,6 @@ export class BiTable {
     //   this.user_id = user_id
     //   console.log('\nuser_id:', user_id)
     // }
-
-    this.dataBaseIds = {
-      messageSheet: '',
-      keywordSheet: '',
-      contactSheet: '',
-      roomSheet: '',
-      envSheet: '',
-      whiteListSheet: '',
-      noticeSheet: '',
-      statisticSheet: '',
-      orderSheet: '',
-      stockSheet: '',
-      groupNoticeSheet: '',
-      qaSheet: '',
-      chatBotSheet: '',
-      chatBotUserSheet: '',
-      groupSheet: '',
-    };
     this.dataBaseNames = { ...this.dataBaseIds };
 
     const tables = await this.getNodesList();
@@ -306,6 +248,7 @@ export class BiTable {
         const sheet = sheets[k as keyof Sheets];
         // console.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
+          this.isInited = false;
           console.debug(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}`);
           const fields = sheet.fields;
           // console.info('fields:', JSON.stringify(fields))
@@ -420,14 +363,20 @@ export class BiTable {
           console.log(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`);
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
           this.dataBaseNames[k as keyof DateBase] = sheet.name;
+          this.dataBaseIdsMap[tables[sheet.name]] = k;
         } else {
           /* empty */
         }
       }
-      console.debug('初始化表完成...');
-      const data = JSON.parse(JSON.stringify(this));
-      delete data.lark;
-      return { message: 'success', code: 200, data: JSON.stringify(data) };
+      if (this.isInited) {
+        console.debug('初始化表完成...');
+        const data = JSON.parse(JSON.stringify(this));
+        delete data.lark;
+        return { message: 'success', code: 200, data };
+      } else {
+        // 本次请求有新建表格，需要重新运行
+        await this.createSheet(config);
+      }
     } else {
       return { message: 'fail', code: 400, data: '' };
     }
@@ -452,7 +401,7 @@ export class BiTable {
       }
       return tables;
     } else {
-      return {};
+      return undefined;
     }
   }
 

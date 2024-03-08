@@ -44,6 +44,15 @@ import { CopilotModule } from './modules/copilot/copilot.module';
 import { GroupsService } from './modules/groups/groups.service';
 import { GroupsController } from './modules/groups/groups.controller';
 import { GroupsModule } from './modules/groups/groups.module';
+import { WelcomesService } from './modules/welcomes/welcomes.service';
+import { WelcomesController } from './modules/welcomes/welcomes.controller';
+import { WelcomesModule } from './modules/welcomes/welcomes.module';
+import { MediasService } from './modules/medias/medias.service';
+import { MediasController } from './modules/medias/medias.controller';
+import { MediasModule } from './modules/medias/medias.module';
+import { CarpoolingsService } from './modules/carpoolings/carpoolings.service';
+import { CarpoolingsController } from './modules/carpoolings/carpoolings.controller';
+import { CarpoolingsModule } from './modules/carpoolings/carpoolings.module';
 
 @Module({
   imports: [
@@ -64,6 +73,9 @@ import { GroupsModule } from './modules/groups/groups.module';
     ChatbotsModule,
     CopilotModule,
     GroupsModule,
+    WelcomesModule,
+    MediasModule,
+    CarpoolingsModule,
   ],
   controllers: [
     AppController,
@@ -81,6 +93,9 @@ import { GroupsModule } from './modules/groups/groups.module';
     ChatbotsController,
     CopilotController,
     GroupsController,
+    WelcomesController,
+    MediasController,
+    CarpoolingsController,
   ],
   providers: [
     AppService,
@@ -96,6 +111,9 @@ import { GroupsModule } from './modules/groups/groups.module';
     ChatbotsService,
     CopilotService,
     GroupsService,
+    WelcomesService,
+    MediasService,
+    CarpoolingsService,
   ],
 })
 export class AppModule {}

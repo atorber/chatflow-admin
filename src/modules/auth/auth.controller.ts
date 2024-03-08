@@ -53,10 +53,7 @@ export class AuthController {
         return {
           code: 200,
           message: 'success',
-          data: {
-            token: token,
-            spaceId: spaceId,
-          },
+          data: res.data,
         };
       } else {
         return {
