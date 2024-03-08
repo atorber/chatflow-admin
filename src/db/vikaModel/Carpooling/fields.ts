@@ -81,6 +81,30 @@ export const vikaFields = {
         editable: true,
       },
       {
+        id: 'fldAj0kCgDIDT',
+        name: '群名称',
+        type: 'Text',
+        editable: true,
+      },
+      {
+        id: 'fldAj0kCgDIDT',
+        name: '群ID',
+        type: 'Text',
+        editable: true,
+      },
+      {
+        id: 'fldAj0kCgDIDT',
+        name: '发布者ID',
+        type: 'Text',
+        editable: true,
+      },
+      {
+        id: 'fldAj0kCgDIDT',
+        name: '创建时间',
+        type: 'Text',
+        editable: true,
+      },
+      {
         id: 'fldXrv3ioaJgK',
         name: '状态',
         type: 'SingleSelect',
