@@ -61,7 +61,7 @@ export class QasController {
     // console.debug(db);
     const res: any = { code: 400, message: 'fail', data: {} };
     try {
-      const resCreate = await db.db.welcome.create(body);
+      const resCreate = await db.db.qa.create(body);
       res.data = resCreate;
       console.debug('resCreate', resCreate);
       if (resCreate.data.recordId) {
@@ -103,7 +103,7 @@ export class QasController {
     }
     // console.debug(db);
 
-    const resDel = await db.db.welcome.delete(body.recordId);
+    const resDel = await db.db.qa.delete(body.recordId);
     console.debug('welcome resDel', resDel);
 
     const res: any = {

@@ -49,7 +49,7 @@ export class AuthController {
     try {
       const res = await this.authService.init(spaceId, token);
       console.info('init res:', res);
-      if (res.message === 'success') {
+      if (res?.message === 'success') {
         return {
           code: 200,
           message: 'success',
