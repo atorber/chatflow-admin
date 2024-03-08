@@ -39,6 +39,10 @@ export class Carpoolings extends BaseEntity {
   route: string;
 
   text: string;
+  topic: string;
+  roomId: string;
+  wxid: string;
+  createdAt: string;
 
   state: '开启' | '关闭';
 
@@ -85,6 +89,10 @@ export class Carpoolings extends BaseEntity {
        */
       route: '途经路线',
       text: '原始消息',
+      topic: '群名称',
+      roomId: '群ID',
+      wxid: '发布者ID',
+      createdAt: '创建时间',
       state: '状态',
     },
     tableName: '顺风车|Carpooling', // 表名
