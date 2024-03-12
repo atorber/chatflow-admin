@@ -111,7 +111,7 @@ export class AuthService {
         apiKey: db.token,
         baseId: db.dataBaseIds.groupNoticeSheet, // 设置 base ID
       });
-      userCur.db.groupnotice = groupnotice;
+      userCur.db.groupNotice = groupnotice;
 
       const group = new Groups();
       group.setVikaOptions({
