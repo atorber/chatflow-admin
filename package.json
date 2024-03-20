@@ -1,6 +1,6 @@
 {
   "name": "chatflow-admin",
-  "version": "3.0.0-vika-Beta-11",
+  "version": "3.0.0-vika-Beta-14-1",
   "description": "",
   "author": "",
   "private": true,
@@ -9,6 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "dev": "nest start --watch",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

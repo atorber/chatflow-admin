@@ -87,20 +87,20 @@ const defaultRecords = {
     pageNum: 1,
     pageSize: 1,
     records: [
-      {
-        recordId: 'rechd25gDKrw7',
-        fields: {
-          '编号|serialNumber': '123',
-          '活动编号|code': '4',
-          '活动描述|desc': '示例活动',
-          '昵称|name': '大师',
-          '备注名称(选填)|alias': 'chatflow作者',
-          '好友ID(选填)|wxid': 'ledongmao',
-          '群名称|topic': '瓦力是群主',
-          '创建时间|createdAt': '1702522321914',
-          '备注|info': '示例订单信息',
-        },
-      },
+      // {
+      //   recordId: 'rechd25gDKrw7',
+      //   fields: {
+      //     '编号|serialNumber': '123',
+      //     '活动编号|code': '4',
+      //     '活动描述|desc': '示例活动',
+      //     '昵称|name': '大师',
+      //     '备注名称(选填)|alias': 'chatflow作者',
+      //     '好友ID(选填)|wxid': 'ledongmao',
+      //     '群名称|topic': '瓦力是群主',
+      //     '创建时间|createdAt': '1702522321914',
+      //     '备注|info': '示例订单信息',
+      //   },
+      // },
     ],
   },
 };

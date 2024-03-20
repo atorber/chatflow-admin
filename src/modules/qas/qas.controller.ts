@@ -38,6 +38,8 @@ export class QasController {
         fields.recordId = value.recordId;
         return fields;
       });
+      res.code = 200;
+      res.message = 'success';
       res.data = {
         page: 1,
         pageSize: 1000,
