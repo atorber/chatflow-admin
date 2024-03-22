@@ -158,11 +158,11 @@ export class BiTable {
   }
 
   async createSheet(config: BiTableConfig) {
+    console.info('初始化检查并创建系统表...');
     this.spaceId = config.spaceId;
     this.vika = new Vika({ token: config.token });
     this.token = config.token;
     this.dataBaseNames = { ...this.dataBaseIds };
-
     try {
       const tables = await this.getNodesList();
       console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2));
@@ -293,6 +293,7 @@ export class BiTable {
               );
             }
           } else if (sheet) {
+            this.isInited = true;
             // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
             this.dataBaseIds[k as keyof DateBase] = tables[sheet.name];
             this.dataBaseNames[k as keyof DateBase] = sheet.name;
@@ -308,6 +309,7 @@ export class BiTable {
           return { message: 'success', code: 200, data };
         } else {
           // 本次请求有新建表格，需要重新运行
+          console.info('本次请求有新建表格，需要重新运行...');
           await this.createSheet(config);
         }
       } else {
