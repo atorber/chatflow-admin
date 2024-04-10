@@ -261,7 +261,7 @@ export class ChatsController {
       );
     }
     // console.debug('vika res', res);
-    const items = res
+    const items = res.data
       .map((value: any) => {
         const { recordId } = value;
         const {
