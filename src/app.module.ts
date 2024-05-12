@@ -53,6 +53,9 @@ import { MediasModule } from './modules/medias/medias.module';
 import { CarpoolingsService } from './modules/carpoolings/carpoolings.service';
 import { CarpoolingsController } from './modules/carpoolings/carpoolings.controller';
 import { CarpoolingsModule } from './modules/carpoolings/carpoolings.module';
+import { MagicService } from './modules/magic/magic.service';
+import { MagicController } from './modules/magic/magic.controller';
+import { MagicModule } from './modules/magic/magic.module';
 
 @Module({
   imports: [
@@ -76,6 +79,7 @@ import { CarpoolingsModule } from './modules/carpoolings/carpoolings.module';
     WelcomesModule,
     MediasModule,
     CarpoolingsModule,
+    MagicModule,
   ],
   controllers: [
     AppController,
@@ -96,6 +100,7 @@ import { CarpoolingsModule } from './modules/carpoolings/carpoolings.module';
     WelcomesController,
     MediasController,
     CarpoolingsController,
+    MagicController,
   ],
   providers: [
     AppService,
@@ -114,6 +119,7 @@ import { CarpoolingsModule } from './modules/carpoolings/carpoolings.module';
     WelcomesService,
     MediasService,
     CarpoolingsService,
+    MagicService,
   ],
 })
 export class AppModule {}
