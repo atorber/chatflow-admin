@@ -1,5 +1,5 @@
 # 使用更小的基础镜像
-FROM node:18-alpine
+FROM node:18.20.2
 
 # 设置工作目录
 WORKDIR /usr/src/app
@@ -7,17 +7,8 @@ WORKDIR /usr/src/app
 # 复制 package.json 和 package-lock.json 并执行 npm install
 COPY package.json ./
 
-# 使用apk安装必要的包
-RUN apk add --no-cache --update \
-    python3 \
-    make \
-    g++ \
-    cairo-dev \
-    pango-dev \
-    jpeg-dev \
-    giflib-dev \
-    libpng-dev \
-    pkg-config
+# 安装 pkg-config 工具
+RUN sudo apt-get update && sudo apt-get install -y pkg-config
 
 RUN npm install
 
