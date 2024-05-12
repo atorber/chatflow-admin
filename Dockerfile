@@ -11,5 +11,8 @@ RUN npm install
 # 复制应用程序文件
 COPY . .
 
+# 安装python3
+RUN apk add --no-cache python3
+
 # 设置启动命令
 CMD [ "npm", "run", "dev" ]
