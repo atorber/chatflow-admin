@@ -10,6 +10,9 @@ COPY package.json ./
 # 安装python3
 RUN apk add --no-cache python3
 
+# 安装 pkg-config 工具
+RUN sudo apt-get update && sudo apt-get install -y pkg-config
+
 RUN npm install
 
 # 复制应用程序文件
