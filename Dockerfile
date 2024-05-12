@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package.json ./
 
 # 安装 pkg-config 工具
-RUN sudo apt-get update && sudo apt-get install -y pkg-config
+RUN apt-get update && sudo apt-get install -y pkg-config
 
 RUN npm install
 
