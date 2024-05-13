@@ -1,5 +1,6 @@
 # 使用更小的基础镜像
-FROM node:18.20.2
+# FROM node:18.20.2
+FROM node:18.17.0-alpine
 
 # 设置工作目录
 WORKDIR /usr/src/app
