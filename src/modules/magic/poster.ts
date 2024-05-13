@@ -374,7 +374,7 @@ export async function sliceImage(sourcePath: string, outputPath: string) {
 
 export async function downloadImage(url: string, outputPath: string) {
   const fileBox = FileBox.fromUrl(url);
-  const fileName = path.join(outputPath, fileBox.name);
+  const fileName = path.join(__dirname, outputPath, fileBox.name);
   // console.info('fileName:', fileName);
   await fileBox.toFile(fileName, true);
   return fileName;
@@ -481,7 +481,8 @@ export async function drawPosterWithText(
   // 输出为PNG文件
   const buffer = canvas.toBuffer('image/png');
   const fileName = path.basename(imagePath, path.extname(imagePath));
-  const outputFileName = `${outputPath}/${title}-${fileName}-framed-poster.png`;
+  const newFileName = `${title}-${fileName}-framed-poster.png`;
+  const outputFileName = path.join(__dirname, outputPath, newFileName);
   fs.writeFileSync(outputFileName, buffer);
-  return outputFileName;
+  return { newFileName, outputFileName };
 }
