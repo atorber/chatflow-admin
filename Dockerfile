@@ -11,6 +11,8 @@ COPY package.json ./
 # 安装 pkg-config 工具
 # RUN apt-get update && apt-get install -y pkg-config
 RUN apk add --update pkgconfig
+RUN apk add --update python3 make g++ && \
+    ln -sf python3 /usr/bin/python
 
 RUN npm install
 
