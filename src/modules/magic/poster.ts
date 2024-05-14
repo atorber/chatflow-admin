@@ -414,9 +414,13 @@ export async function drawPosterWithText(
   const borderSize = 5; // 外边框的大小
   const borderRadius = 0; // 图片和外边框的倒角的设置
   const borderColor = '#F8F8FF'; // 边框颜色：蓝灰色
-  const titleFont = 'bold 60px sans-serif';
+  // const titleFont = 'bold 60px sans-serif';
+  const titleFont = 'bold 60px';
+
   const titlePaddingBottom = 80; // 标题下方留白
-  const textFont = '28px sans-serif';
+  // const textFont = '28px sans-serif';
+  const textFont = '28px';
+
   const textPaddingBottom = 40; // 正文下方留白
   const textLineHeight = 45; // 文本行高
 
