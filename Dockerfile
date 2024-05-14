@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y pkg-config
 # RUN apk add --update python3 make g++ && \
 #     ln -sf python3 /usr/bin/python
 
+# 对于Debian或Ubuntu基础镜像
+RUN apt-get update && apt-get install -y fonts-noto-cjk
+
 RUN npm install
 
 # 复制应用程序文件
