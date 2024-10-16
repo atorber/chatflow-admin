@@ -1,6 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+import * as Aedes from 'aedes';
+import { createServer } from 'net';
+
+const port = 11883;
+const aedes = Aedes.createBroker();
+const mqttServer = createServer(aedes.handle);
+
+mqttServer.listen(port, function () {
+  console.log('server started and listening on port ', port);
+});
+
 process.on('uncaughtException', (err) => {
   console.error('未捕获的异常:', err);
   // 可以在这里添加一些清理逻辑
