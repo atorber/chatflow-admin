@@ -708,13 +708,14 @@ export class ChatsController {
     // console.debug('ServePublishMessage', data);
 
     // 连接到MQTT服务器
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+    const client = mqtt.connect('mqtt://127.0.0.1:11883', {
       password: '',
       username: '',
     });
     const publishTopic = `thing/chatbot/${db.hash}/command/invoke`;
     const publishPayloadRaw: any = ChatsService.formatMsgToWechaty(body);
     let publishPayload: any = publishPayloadRaw;
+    console.info('ServePublishMessage publishPayload', publishPayload);
     // 加密
     // console.debug('ServePublishMessage db.hash', db.hash);
     const key = getKeyByBasicString(db.hash);
@@ -828,7 +829,7 @@ export class ChatsController {
     }
 
     // 连接到MQTT服务器
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+    const client = mqtt.connect('mqtt://127.0.0.1:11883', {
       password: '',
       username: '',
     });

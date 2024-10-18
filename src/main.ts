@@ -1,16 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { mqttServerWs } from './mqtt-broker';
 
-import * as Aedes from 'aedes';
-import { createServer } from 'net';
-
-const port = 11883;
-const aedes = Aedes.createBroker();
-const mqttServer = createServer(aedes.handle);
-
-mqttServer.listen(port, function () {
-  console.log('server started and listening on port ', port);
-});
+console.log('mqttServerWs', mqttServerWs);
 
 process.on('uncaughtException', (err) => {
   console.error('未捕获的异常:', err);

@@ -335,7 +335,7 @@ export class RoomsController {
     }
 
     // 连接到MQTT服务器
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+    const client = mqtt.connect('mqtt://127.0.0.1:11883', {
       password: '',
       username: '',
     });
